@@ -48,8 +48,9 @@ Aguarde o Spring Boot iniciar (~40s primeira vez, ~20s próximas).
 ### 3. Acessar
 
 - **API**: http://localhost:8080
-- **Swagger UI**: http://localhost:8080/swagger-ui.html
-- **Health**: http://localhost:8080/actuator/health
+- **Swagger UI**: http://localhost:8080/swagger-ui/index.html
+- **Health Check**: http://localhost:8080/api/health
+- **Actuator Health**: http://localhost:8080/actuator/health
 - **Metrics**: http://localhost:8080/actuator/metrics
 
 ### 4. Desenvolvimento
