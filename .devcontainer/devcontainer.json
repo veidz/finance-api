@@ -1,0 +1,74 @@
+{
+  "name": "Finance API Dev Container",
+  "image": "mcr.microsoft.com/devcontainers/java:17",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17",
+      "installMaven": "true",
+      "mavenVersion": "3.9.6"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-spring-initializr",
+        "vmware.vscode-spring-boot",
+        "vscjava.vscode-spring-boot-dashboard",
+        "vscjava.vscode-maven",
+        "redhat.java",
+        "vscjava.vscode-java-debug",
+        "vscjava.vscode-java-test",
+        "editorconfig.editorconfig",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens",
+        "sonarsource.sonarlint-vscode",
+        "cschleiden.vscode-github-actions"
+      ],
+      "settings": {
+        "java.configuration.runtimes": [
+          {
+            "name": "JavaSE-17",
+            "path": "/usr/local/sdkman/candidates/java/current"
+          }
+        ],
+        "java.jdt.ls.java.home": "/usr/local/sdkman/candidates/java/current",
+        "maven.executable.path": "/usr/local/sdkman/candidates/maven/current/bin/mvn",
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+
+  // Forward ports
+  "forwardPorts": [8080, 5432, 5050],
+  "portsAttributes": {
+    "8080": {
+      "label": "Finance API",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
+    },
+    "5050": {
+      "label": "PgAdmin",
+      "onAutoForward": "silent"
+    }
+  },
+
+  // Post create command
+  "postCreateCommand": "chmod +x mvnw && ./mvnw dependency:go-offline",
+
+  // User
+  "remoteUser": "vscode",
+
+  // Mounts
+  "mounts": [
+    "source=${localWorkspaceFolder}/.m2,target=/home/vscode/.m2,type=bind,consistency=cached"
+  ]
+}

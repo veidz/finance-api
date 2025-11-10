@@ -1,0 +1,43 @@
+# Git
+.git
+.gitignore
+.github
+
+# Maven
+target/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Documentation
+*.md
+docs/
+ARCHITECTURE.md
+EXECUTION_PLAN.md
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
