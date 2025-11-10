@@ -27,4 +27,10 @@ class HealthCheckControllerTest {
         .andExpect(jsonPath("$.status").value("UP")).andExpect(jsonPath("$.timestamp").exists())
         .andExpect(jsonPath("$.version").value("0.1.0"));
   }
+
+  @Test
+  void shouldReturnJsonContentTypeWhenGetHealth() throws Exception {
+    mockMvc.perform(get("/api/health")).andExpect(status().isOk())
+        .andExpect(jsonPath("$.status").exists());
+  }
 }
