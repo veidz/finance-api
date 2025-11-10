@@ -1,6 +1,7 @@
 spring:
   application:
     name: finance-api
+    version: 0.1.0
 
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
