@@ -48,12 +48,6 @@ indent_size = 2
 indent_style = space
 indent_size = 2
 
-# Batch files (Windows)
-[*.{bat,cmd}]
-indent_style = space
-indent_size = 2
-end_of_line = crlf
-
 # SQL files
 [*.sql]
 indent_style = space
