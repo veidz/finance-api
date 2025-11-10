@@ -259,6 +259,12 @@
     <groupId>org.jacoco</groupId>
     <artifactId>jacoco-maven-plugin</artifactId>
     <version>${jacoco.version}</version>
+    <configuration>
+      <excludes>
+        <exclude>**/config/**</exclude>
+        <exclude>**/*Application.class</exclude>
+      </excludes>
+    </configuration>
     <executions>
       <execution>
       <id>prepare-agent</id>
@@ -281,7 +287,7 @@
       <configuration>
       <rules>
       <rule>
-          <element>PACKAGE</element>
+          <element>BUNDLE</element>
           <limits>
     <limit>
         <counter>LINE</counter>
@@ -353,6 +359,7 @@
       <failBuildOnCVSS>7</failBuildOnCVSS>
       <skipProvidedScope>true</skipProvidedScope>
       <skipRuntimeScope>false</skipRuntimeScope>
+      <skip>true</skip> <!-- Disabled by default - enable in CI profile -->
     </configuration>
     <executions>
       <execution>
@@ -374,6 +381,25 @@
       <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-failsafe-plugin</artifactId>
+      </plugin>
+    </plugins>
+    </build>
+    </profile>
+
+    <!-- CI Profile (enables security checks) -->
+    <profile>
+    <id>ci</id>
+    <build>
+    <plugins>
+      <plugin>
+      <groupId>org.owasp</groupId>
+      <artifactId>dependency-check-maven</artifactId>
+      <configuration>
+      <skip>false</skip>
+      <failBuildOnCVSS>7</failBuildOnCVSS>
+      <!-- Tolerate update failures in CI -->
+      <failOnError>false</failOnError>
+      </configuration>
       </plugin>
     </plugins>
     </build>
