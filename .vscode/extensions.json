@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "vscjava.vscode-java-pack",
+    "vscjava.vscode-spring-initializr",
+    "vmware.vscode-spring-boot",
+    "vscjava.vscode-spring-boot-dashboard",
+    "vscjava.vscode-maven",
+    "redhat.java",
+    "vscjava.vscode-java-debug",
+    "vscjava.vscode-java-test",
+    "editorconfig.editorconfig",
+    "ms-azuretools.vscode-docker",
+    "eamodio.gitlens",
+    "sonarsource.sonarlint-vscode"
+  ]
+}
