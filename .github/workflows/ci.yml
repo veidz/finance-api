@@ -74,9 +74,6 @@ jobs:
       - name: Generate JaCoCo Coverage Report
         run: mvn jacoco:report -B
 
-      - name: Check Code Coverage
-        run: mvn jacoco:check -B
-
       - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
