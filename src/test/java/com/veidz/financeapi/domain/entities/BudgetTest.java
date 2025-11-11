@@ -262,14 +262,16 @@ class BudgetTest {
     // Given
     UUID userId = UUID.randomUUID();
     Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange activePeriod = new DateRange(LocalDate.now().minusDays(5), LocalDate.now().plusDays(5));
+    DateRange activePeriod = new DateRange(LocalDate.now().minusDays(5),
+        LocalDate.now().plusDays(5));
     Budget activeBudget = Budget.create(userId, "Active Budget", amount, activePeriod);
 
-    DateRange pastPeriod = new DateRange(LocalDate.now().minusDays(30), LocalDate.now().minusDays(1));
+    DateRange pastPeriod = new DateRange(LocalDate.now().minusDays(30),
+        LocalDate.now().minusDays(1));
     Budget pastBudget = Budget.create(userId, "Past Budget", amount, pastPeriod);
 
-    DateRange futurePeriod =
-        new DateRange(LocalDate.now().plusDays(1), LocalDate.now().plusDays(30));
+    DateRange futurePeriod = new DateRange(LocalDate.now().plusDays(1),
+        LocalDate.now().plusDays(30));
     Budget futureBudget = Budget.create(userId, "Future Budget", amount, futurePeriod);
 
     // Then
@@ -289,10 +291,10 @@ class BudgetTest {
     Money spent = new Money(BigDecimal.valueOf(200.00), Currency.getInstance("USD"));
 
     // When
-    Money remaining = budget.calculateRemaining(spent);
+    BigDecimal remaining = budget.calculateRemaining(spent);
 
     // Then
-    assertEquals(0, remaining.getAmount().compareTo(BigDecimal.valueOf(300.00)));
+    assertEquals(0, remaining.compareTo(BigDecimal.valueOf(300.00)));
   }
 
   @Test
@@ -306,10 +308,10 @@ class BudgetTest {
     Money spent = new Money(BigDecimal.valueOf(600.00), Currency.getInstance("USD"));
 
     // When
-    Money remaining = budget.calculateRemaining(spent);
+    BigDecimal remaining = budget.calculateRemaining(spent);
 
     // Then
-    assertEquals(0, remaining.getAmount().compareTo(BigDecimal.valueOf(-100.00)));
+    assertEquals(0, remaining.compareTo(BigDecimal.valueOf(-100.00)));
   }
 
   @Test
