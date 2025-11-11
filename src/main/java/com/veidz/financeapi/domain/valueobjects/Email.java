@@ -4,16 +4,14 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
- * Value Object representing an email address.
- * Immutable and ensures email format validation.
+ * Value Object representing an email address. Immutable and ensures email format validation.
  *
  * @author Veidz
  */
 public final class Email {
 
-  private static final Pattern EMAIL_PATTERN = Pattern.compile(
-      "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
-  );
+  private static final Pattern EMAIL_PATTERN = Pattern
+      .compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
   private final String value;
 
@@ -30,13 +28,13 @@ public final class Email {
     if (value.isBlank()) {
       throw new IllegalArgumentException("Email cannot be empty");
     }
-    
+
     String normalizedEmail = value.trim().toLowerCase();
-    
+
     if (!EMAIL_PATTERN.matcher(normalizedEmail).matches()) {
       throw new IllegalArgumentException("Invalid email format");
     }
-    
+
     this.value = normalizedEmail;
   }
 
