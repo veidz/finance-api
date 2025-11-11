@@ -21,11 +21,6 @@ class UserTest {
       return this;
     }
 
-    TestDataBuilder withEmail(String email) {
-      this.email = new Email(email);
-      return this;
-    }
-
     TestDataBuilder withPassword(String password) {
       this.password = password;
       return this;
