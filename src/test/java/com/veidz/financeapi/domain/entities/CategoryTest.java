@@ -50,12 +50,10 @@ class CategoryTest {
     return new TestDataBuilder();
   }
 
-  @Nested
-  @DisplayName("Creation Tests")
+  @Nested @DisplayName("Creation Tests")
   class CreationTests {
 
-    @Test
-    @DisplayName("Should create category with required fields")
+    @Test @DisplayName("Should create category with required fields")
     void shouldCreateWithRequiredFields() {
       UUID userId = UUID.randomUUID();
       String name = "Salary";
@@ -72,8 +70,7 @@ class CategoryTest {
       assertNotNull(category.getCreatedAt());
     }
 
-    @Test
-    @DisplayName("Should create category with parent")
+    @Test @DisplayName("Should create category with parent")
     void shouldCreateWithParent() {
       UUID parentCategoryId = UUID.randomUUID();
       Category category = aCategory().withParentCategoryId(parentCategoryId).build();
@@ -81,56 +78,45 @@ class CategoryTest {
       assertEquals(parentCategoryId, category.getParentCategoryId());
     }
 
-
-
-    @Test
-    @DisplayName("Should throw exception when user ID is null")
+    @Test @DisplayName("Should throw exception when user ID is null")
     void shouldRejectNullUserId() {
       assertThrows(IllegalArgumentException.class, () -> aCategory().withUserId(null).build());
     }
 
-    @Test
-    @DisplayName("Should throw exception when name is null")
+    @Test @DisplayName("Should throw exception when name is null")
     void shouldRejectNullName() {
       assertThrows(IllegalArgumentException.class, () -> aCategory().withName(null).build());
     }
 
-    @Test
-    @DisplayName("Should throw exception when name is empty")
+    @Test @DisplayName("Should throw exception when name is empty")
     void shouldRejectEmptyName() {
       assertThrows(IllegalArgumentException.class, () -> aCategory().withName("").build());
     }
 
-    @Test
-    @DisplayName("Should throw exception when name is blank")
+    @Test @DisplayName("Should throw exception when name is blank")
     void shouldRejectBlankName() {
       assertThrows(IllegalArgumentException.class, () -> aCategory().withName("   ").build());
     }
 
-    @Test
-    @DisplayName("Should throw exception when type is null")
+    @Test @DisplayName("Should throw exception when type is null")
     void shouldRejectNullType() {
       assertThrows(IllegalArgumentException.class, () -> aCategory().withType(null).build());
     }
   }
 
-  @Nested
-  @DisplayName("Hierarchy Tests")
+  @Nested @DisplayName("Hierarchy Tests")
   class HierarchyTests {
 
-    @Test
-    @DisplayName("Should allow null parent category ID")
+    @Test @DisplayName("Should allow null parent category ID")
     void shouldAllowNullParent() {
       assertDoesNotThrow(() -> aCategory().withParentCategoryId(null).build());
     }
   }
 
-  @Nested
-  @DisplayName("Update Tests")
+  @Nested @DisplayName("Update Tests")
   class UpdateTests {
 
-    @Test
-    @DisplayName("Should update name successfully")
+    @Test @DisplayName("Should update name successfully")
     void shouldUpdateName() {
       Category category = aCategory().withName("Old Name").build();
 
@@ -139,22 +125,19 @@ class CategoryTest {
       assertEquals("New Name", category.getName());
     }
 
-    @Test
-    @DisplayName("Should throw exception when updating to null name")
+    @Test @DisplayName("Should throw exception when updating to null name")
     void shouldRejectNullInNameUpdate() {
       Category category = aCategory().build();
 
       assertThrows(IllegalArgumentException.class, () -> category.updateName(null));
     }
 
-    @Test
-    @DisplayName("Should throw exception when updating to empty name")
+    @Test @DisplayName("Should throw exception when updating to empty name")
     void shouldRejectEmptyInNameUpdate() {
       Category category = aCategory().build();
 
       assertThrows(IllegalArgumentException.class, () -> category.updateName(""));
     }
-
 
   }
 }

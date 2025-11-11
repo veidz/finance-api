@@ -40,12 +40,10 @@ class UserTest {
     return new TestDataBuilder();
   }
 
-  @Nested
-  @DisplayName("Creation Tests")
+  @Nested @DisplayName("Creation Tests")
   class CreationTests {
 
-    @Test
-    @DisplayName("Should create user with all valid data")
+    @Test @DisplayName("Should create user with all valid data")
     void shouldCreateWithValidData() {
       String name = "John Doe";
       Email email = new Email("john.doe@example.com");
@@ -60,8 +58,7 @@ class UserTest {
       assertNotNull(user.getCreatedAt());
     }
 
-    @Test
-    @DisplayName("Should hash password when creating user")
+    @Test @DisplayName("Should hash password when creating user")
     void shouldHashPassword() {
       String plainPassword = "MyPassword123";
       User user = aUser().withPassword(plainPassword).build();
@@ -73,60 +70,49 @@ class UserTest {
       assertTrue(hashedPassword.length() > plainPassword.length());
     }
 
-    @Test
-    @DisplayName("Should throw exception when name is null")
+    @Test @DisplayName("Should throw exception when name is null")
     void shouldRejectNullName() {
-      assertThrows(
-          IllegalArgumentException.class,
+      assertThrows(IllegalArgumentException.class,
           () -> User.create(null, new Email("user@example.com"), "password123"));
     }
 
-    @Test
-    @DisplayName("Should throw exception when name is empty")
+    @Test @DisplayName("Should throw exception when name is empty")
     void shouldRejectEmptyName() {
       assertThrows(IllegalArgumentException.class, () -> aUser().withName("").build());
     }
 
-    @Test
-    @DisplayName("Should throw exception when name is blank")
+    @Test @DisplayName("Should throw exception when name is blank")
     void shouldRejectBlankName() {
       assertThrows(IllegalArgumentException.class, () -> aUser().withName("   ").build());
     }
 
-    @Test
-    @DisplayName("Should throw exception when email is null")
+    @Test @DisplayName("Should throw exception when email is null")
     void shouldRejectNullEmail() {
-      assertThrows(
-          IllegalArgumentException.class, () -> User.create("John Doe", null, "password123"));
+      assertThrows(IllegalArgumentException.class,
+          () -> User.create("John Doe", null, "password123"));
     }
 
-    @Test
-    @DisplayName("Should throw exception when password is null")
+    @Test @DisplayName("Should throw exception when password is null")
     void shouldRejectNullPassword() {
-      assertThrows(
-          IllegalArgumentException.class,
+      assertThrows(IllegalArgumentException.class,
           () -> User.create("John Doe", new Email("user@example.com"), null));
     }
 
-    @Test
-    @DisplayName("Should throw exception when password is empty")
+    @Test @DisplayName("Should throw exception when password is empty")
     void shouldRejectEmptyPassword() {
       assertThrows(IllegalArgumentException.class, () -> aUser().withPassword("").build());
     }
 
-    @Test
-    @DisplayName("Should throw exception when password is blank")
+    @Test @DisplayName("Should throw exception when password is blank")
     void shouldRejectBlankPassword() {
       assertThrows(IllegalArgumentException.class, () -> aUser().withPassword("   ").build());
     }
   }
 
-  @Nested
-  @DisplayName("Password Verification Tests")
+  @Nested @DisplayName("Password Verification Tests")
   class PasswordVerificationTests {
 
-    @Test
-    @DisplayName("Should verify correct password")
+    @Test @DisplayName("Should verify correct password")
     void shouldVerifyCorrectPassword() {
       String plainPassword = "MySecurePassword";
       User user = aUser().withPassword(plainPassword).build();
@@ -134,16 +120,14 @@ class UserTest {
       assertTrue(user.verifyPassword(plainPassword));
     }
 
-    @Test
-    @DisplayName("Should reject incorrect password")
+    @Test @DisplayName("Should reject incorrect password")
     void shouldRejectIncorrectPassword() {
       User user = aUser().withPassword("CorrectPassword").build();
 
       assertFalse(user.verifyPassword("WrongPassword"));
     }
 
-    @Test
-    @DisplayName("Should return false for null password in verification")
+    @Test @DisplayName("Should return false for null password in verification")
     void shouldReturnFalseForNullPassword() {
       User user = aUser().build();
 
@@ -151,12 +135,10 @@ class UserTest {
     }
   }
 
-  @Nested
-  @DisplayName("Update Tests")
+  @Nested @DisplayName("Update Tests")
   class UpdateTests {
 
-    @Test
-    @DisplayName("Should update name successfully")
+    @Test @DisplayName("Should update name successfully")
     void shouldUpdateName() {
       User user = aUser().withName("Old Name").build();
 
@@ -165,16 +147,14 @@ class UserTest {
       assertEquals("New Name", user.getName());
     }
 
-    @Test
-    @DisplayName("Should throw exception when updating to null name")
+    @Test @DisplayName("Should throw exception when updating to null name")
     void shouldRejectNullInNameUpdate() {
       User user = aUser().build();
 
       assertThrows(IllegalArgumentException.class, () -> user.updateName(null));
     }
 
-    @Test
-    @DisplayName("Should throw exception when updating to empty name")
+    @Test @DisplayName("Should throw exception when updating to empty name")
     void shouldRejectEmptyInNameUpdate() {
       User user = aUser().build();
 
