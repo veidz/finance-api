@@ -1,6 +1,8 @@
 package com.veidz.financeapi.domain.entities;
 
 import com.veidz.financeapi.domain.valueobjects.Money;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -10,427 +12,337 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("FinancialGoal Entity Tests")
 class FinancialGoalTest {
 
-  @Test
-  void shouldCreateFinancialGoalWithValidData() {
-    UUID userId = UUID.randomUUID();
-    String name = "Emergency Fund";
-    Money targetAmount = new Money(new BigDecimal("10000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(12);
+  // Test Data Builder
+  private static class TestDataBuilder {
+    private UUID userId = UUID.randomUUID();
+    private String name = "Test Goal";
+    private Money targetAmount = money("1000.00");
+    private LocalDate deadline = LocalDate.now().plusMonths(6);
 
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
+    TestDataBuilder withUserId(UUID userId) {
+      this.userId = userId;
+      return this;
+    }
 
-    assertNotNull(goal);
-    assertNotNull(goal.getId());
-    assertEquals(userId, goal.getUserId());
-    assertEquals(name, goal.getName());
-    assertEquals(targetAmount, goal.getTargetAmount());
-    assertEquals(deadline, goal.getDeadline());
-    assertNotNull(goal.getCreatedAt());
-    assertNotNull(goal.getUpdatedAt());
+    TestDataBuilder withName(String name) {
+      this.name = name;
+      return this;
+    }
+
+    TestDataBuilder withTargetAmount(String amount) {
+      this.targetAmount = money(amount);
+      return this;
+    }
+
+    TestDataBuilder withDeadline(LocalDate deadline) {
+      this.deadline = deadline;
+      return this;
+    }
+
+    FinancialGoal build() {
+      return FinancialGoal.create(userId, name, targetAmount, deadline);
+    }
   }
 
-  @Test
-  void shouldThrowExceptionWhenUserIdIsNull() {
-    String name = "Vacation Fund";
-    Money targetAmount = new Money(new BigDecimal("5000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(6);
-
-    assertThrows(IllegalArgumentException.class,
-        () -> FinancialGoal.create(null, name, targetAmount, deadline));
+  private static TestDataBuilder aGoal() {
+    return new TestDataBuilder();
   }
 
-  @Test
-  void shouldThrowExceptionWhenNameIsNull() {
-    UUID userId = UUID.randomUUID();
-    Money targetAmount = new Money(new BigDecimal("5000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(6);
-
-    assertThrows(IllegalArgumentException.class,
-        () -> FinancialGoal.create(userId, null, targetAmount, deadline));
+  private static Money money(String amount) {
+    return new Money(new BigDecimal(amount), Currency.getInstance("BRL"));
   }
 
-  @Test
-  void shouldThrowExceptionWhenNameIsEmpty() {
-    UUID userId = UUID.randomUUID();
-    Money targetAmount = new Money(new BigDecimal("5000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(6);
+  @Nested @DisplayName("Creation Tests")
+  class CreationTests {
 
-    assertThrows(IllegalArgumentException.class,
-        () -> FinancialGoal.create(userId, "", targetAmount, deadline));
+    @Test @DisplayName("Should create goal with valid data")
+    void shouldCreateWithValidData() {
+      UUID userId = UUID.randomUUID();
+      String name = "Emergency Fund";
+      Money targetAmount = money("10000.00");
+      LocalDate deadline = LocalDate.now().plusMonths(12);
+
+      FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
+
+      assertNotNull(goal);
+      assertNotNull(goal.getId());
+      assertEquals(userId, goal.getUserId());
+      assertEquals(name, goal.getName());
+      assertEquals(targetAmount, goal.getTargetAmount());
+      assertEquals(deadline, goal.getDeadline());
+      assertNotNull(goal.getCreatedAt());
+      assertNotNull(goal.getUpdatedAt());
+    }
+
+    @Test @DisplayName("Should throw exception when user ID is null")
+    void shouldRejectNullUserId() {
+      assertThrows(IllegalArgumentException.class, () -> aGoal().withUserId(null).build());
+    }
+
+    @Test @DisplayName("Should throw exception when name is null")
+    void shouldRejectNullName() {
+      assertThrows(IllegalArgumentException.class, () -> aGoal().withName(null).build());
+    }
+
+    @Test @DisplayName("Should throw exception when name is empty")
+    void shouldRejectEmptyName() {
+      assertThrows(IllegalArgumentException.class, () -> aGoal().withName("").build());
+    }
+
+    @Test @DisplayName("Should throw exception when name is blank")
+    void shouldRejectBlankName() {
+      assertThrows(IllegalArgumentException.class, () -> aGoal().withName("   ").build());
+    }
+
+    @Test @DisplayName("Should throw exception when target amount is null")
+    void shouldRejectNullTargetAmount() {
+      assertThrows(IllegalArgumentException.class, () -> FinancialGoal.create(UUID.randomUUID(),
+          "Test", null, LocalDate.now().plusMonths(1)));
+    }
+
+    @Test @DisplayName("Should throw exception when deadline is null")
+    void shouldRejectNullDeadline() {
+      assertThrows(IllegalArgumentException.class, () -> aGoal().withDeadline(null).build());
+    }
+
+    @Test @DisplayName("Should throw exception when deadline is in the past")
+    void shouldRejectPastDeadline() {
+      LocalDate pastDate = LocalDate.now().minusDays(1);
+      assertThrows(IllegalArgumentException.class, () -> aGoal().withDeadline(pastDate).build());
+    }
+
+    @Test @DisplayName("Should allow deadline to be today")
+    void shouldAllowTodayAsDeadline() {
+      LocalDate today = LocalDate.now();
+      FinancialGoal goal = aGoal().withDeadline(today).build();
+
+      assertEquals(today, goal.getDeadline());
+    }
   }
 
-  @Test
-  void shouldThrowExceptionWhenNameIsBlank() {
-    UUID userId = UUID.randomUUID();
-    Money targetAmount = new Money(new BigDecimal("5000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(6);
+  @Nested @DisplayName("Progress Calculation Tests")
+  class ProgressCalculationTests {
 
-    assertThrows(IllegalArgumentException.class,
-        () -> FinancialGoal.create(userId, "   ", targetAmount, deadline));
+    @Test @DisplayName("Should calculate progress percentage correctly")
+    void shouldCalculateProgressPercentage() {
+      FinancialGoal goal = aGoal().withTargetAmount("1000.00").build();
+      Money currentAmount = money("250.00");
+
+      BigDecimal progress = goal.calculateProgress(currentAmount);
+
+      assertEquals(new BigDecimal("25.00"), progress);
+    }
+
+    @Test @DisplayName("Should return zero progress when current amount is zero")
+    void shouldReturnZeroProgressForZeroAmount() {
+      FinancialGoal goal = aGoal().build();
+      Money currentAmount = money("0.00");
+
+      BigDecimal progress = goal.calculateProgress(currentAmount);
+
+      assertEquals(BigDecimal.ZERO, progress);
+    }
+
+    @Test @DisplayName("Should return 100% when goal is reached")
+    void shouldReturnFullProgressWhenReached() {
+      FinancialGoal goal = aGoal().withTargetAmount("1000.00").build();
+      Money currentAmount = money("1000.00");
+
+      BigDecimal progress = goal.calculateProgress(currentAmount);
+
+      assertEquals(new BigDecimal("100.00"), progress);
+    }
+
+    @Test @DisplayName("Should allow progress over 100%")
+    void shouldAllowProgressOverOneHundred() {
+      FinancialGoal goal = aGoal().withTargetAmount("1000.00").build();
+      Money currentAmount = money("1500.00");
+
+      BigDecimal progress = goal.calculateProgress(currentAmount);
+
+      assertEquals(new BigDecimal("150.00"), progress);
+    }
+
+    @Test @DisplayName("Should throw exception when calculating progress with null amount")
+    void shouldRejectNullAmountInProgress() {
+      FinancialGoal goal = aGoal().build();
+
+      assertThrows(IllegalArgumentException.class, () -> goal.calculateProgress(null));
+    }
+
+    @Test @DisplayName("Should throw exception when calculating progress with different currency")
+    void shouldRejectDifferentCurrencyInProgress() {
+      FinancialGoal goal = aGoal().build();
+      Money usdAmount = new Money(new BigDecimal("200.00"), Currency.getInstance("USD"));
+
+      assertThrows(IllegalArgumentException.class, () -> goal.calculateProgress(usdAmount));
+    }
   }
 
-  @Test
-  void shouldThrowExceptionWhenTargetAmountIsNull() {
-    UUID userId = UUID.randomUUID();
-    String name = "New Car";
-    LocalDate deadline = LocalDate.now().plusMonths(24);
+  @Nested @DisplayName("Remaining Amount Calculation Tests")
+  class RemainingAmountTests {
 
-    assertThrows(IllegalArgumentException.class,
-        () -> FinancialGoal.create(userId, name, null, deadline));
+    @Test @DisplayName("Should calculate remaining amount correctly")
+    void shouldCalculateRemainingAmount() {
+      FinancialGoal goal = aGoal().withTargetAmount("10000.00").build();
+      Money currentAmount = money("3000.00");
+
+      Money remaining = goal.calculateRemaining(currentAmount);
+
+      assertEquals(money("7000.00"), remaining);
+    }
+
+    @Test @DisplayName("Should return zero when goal is reached")
+    void shouldReturnZeroWhenReached() {
+      FinancialGoal goal = aGoal().withTargetAmount("1000.00").build();
+      Money currentAmount = money("1000.00");
+
+      Money remaining = goal.calculateRemaining(currentAmount);
+
+      assertEquals(money("0.00"), remaining);
+    }
+
+    @Test @DisplayName("Should return zero when goal is exceeded")
+    void shouldReturnZeroWhenExceeded() {
+      FinancialGoal goal = aGoal().withTargetAmount("1000.00").build();
+      Money currentAmount = money("1500.00");
+
+      Money remaining = goal.calculateRemaining(currentAmount);
+
+      assertEquals(money("0.00"), remaining);
+    }
+
+    @Test @DisplayName("Should throw exception when calculating remaining with null amount")
+    void shouldRejectNullAmountInRemaining() {
+      FinancialGoal goal = aGoal().build();
+
+      assertThrows(IllegalArgumentException.class, () -> goal.calculateRemaining(null));
+    }
+
+    @Test @DisplayName("Should throw exception when calculating remaining with different currency")
+    void shouldRejectDifferentCurrencyInRemaining() {
+      FinancialGoal goal = aGoal().build();
+      Money eurAmount = new Money(new BigDecimal("200.00"), Currency.getInstance("EUR"));
+
+      assertThrows(IllegalArgumentException.class, () -> goal.calculateRemaining(eurAmount));
+    }
   }
 
-  @Test
-  void shouldThrowExceptionWhenDeadlineIsNull() {
-    UUID userId = UUID.randomUUID();
-    String name = "House Down Payment";
-    Money targetAmount = new Money(new BigDecimal("50000.00"), Currency.getInstance("BRL"));
+  @Nested @DisplayName("Goal Status Tests")
+  class GoalStatusTests {
 
-    assertThrows(IllegalArgumentException.class,
-        () -> FinancialGoal.create(userId, name, targetAmount, null));
+    @Test @DisplayName("Should recognize when goal is reached")
+    void shouldRecognizeGoalReached() {
+      FinancialGoal goal = aGoal().withTargetAmount("1000.00").build();
+      Money currentAmount = money("1000.00");
+
+      assertTrue(goal.isReached(currentAmount));
+    }
+
+    @Test @DisplayName("Should recognize when goal is not reached")
+    void shouldRecognizeGoalNotReached() {
+      FinancialGoal goal = aGoal().withTargetAmount("1000.00").build();
+      Money currentAmount = money("500.00");
+
+      assertFalse(goal.isReached(currentAmount));
+    }
+
+    @Test @DisplayName("Should consider goal reached when exceeded")
+    void shouldConsiderExceededAsReached() {
+      FinancialGoal goal = aGoal().withTargetAmount("1000.00").build();
+      Money currentAmount = money("1500.00");
+
+      assertTrue(goal.isReached(currentAmount));
+    }
+
+    @Test @DisplayName("Should check if deadline has not passed for future deadline")
+    void shouldCheckFutureDeadlineNotPassed() {
+      LocalDate futureDeadline = LocalDate.now().plusDays(1);
+      FinancialGoal goal = aGoal().withDeadline(futureDeadline).build();
+
+      assertFalse(goal.isDeadlinePassed());
+    }
+
+    @Test @DisplayName("Should check if deadline is today")
+    void shouldCheckTodayDeadlineNotPassed() {
+      LocalDate today = LocalDate.now();
+      FinancialGoal goal = aGoal().withDeadline(today).build();
+
+      assertFalse(goal.isDeadlinePassed());
+    }
   }
 
-  @Test
-  void shouldThrowExceptionWhenDeadlineIsInThePast() {
-    UUID userId = UUID.randomUUID();
-    String name = "Investment";
-    Money targetAmount = new Money(new BigDecimal("10000.00"), Currency.getInstance("BRL"));
-    LocalDate pastDate = LocalDate.now().minusDays(1);
-
-    assertThrows(IllegalArgumentException.class,
-        () -> FinancialGoal.create(userId, name, targetAmount, pastDate));
-  }
-
-  @Test
-  void shouldAllowDeadlineToBeToday() {
-    UUID userId = UUID.randomUUID();
-    String name = "Short Term Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate today = LocalDate.now();
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, today);
-
-    assertNotNull(goal);
-    assertEquals(today, goal.getDeadline());
-  }
-
-  @Test
-  void shouldCalculateProgressPercentage() {
-    UUID userId = UUID.randomUUID();
-    String name = "Savings Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(6);
-    Money currentAmount = new Money(new BigDecimal("250.00"), Currency.getInstance("BRL"));
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-    BigDecimal progress = goal.calculateProgress(currentAmount);
-
-    assertEquals(new BigDecimal("25.00"), progress);
-  }
-
-  @Test
-  void shouldReturnZeroProgressWhenCurrentAmountIsZero() {
-    UUID userId = UUID.randomUUID();
-    String name = "Investment Goal";
-    Money targetAmount = new Money(new BigDecimal("5000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(12);
-    Money currentAmount = new Money(BigDecimal.ZERO, Currency.getInstance("BRL"));
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-    BigDecimal progress = goal.calculateProgress(currentAmount);
-
-    assertEquals(BigDecimal.ZERO, progress);
-  }
-
-  @Test
-  void shouldReturnFullProgressWhenGoalIsReached() {
-    UUID userId = UUID.randomUUID();
-    String name = "Completed Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(3);
-    Money currentAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-    BigDecimal progress = goal.calculateProgress(currentAmount);
-
-    assertEquals(new BigDecimal("100.00"), progress);
-  }
-
-  @Test
-  void shouldAllowProgressOverOneHundredPercent() {
-    UUID userId = UUID.randomUUID();
-    String name = "Exceeded Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(3);
-    Money currentAmount = new Money(new BigDecimal("1500.00"), Currency.getInstance("BRL"));
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-    BigDecimal progress = goal.calculateProgress(currentAmount);
-
-    assertEquals(new BigDecimal("150.00"), progress);
-  }
-
-  @Test
-  void shouldThrowExceptionWhenCalculatingProgressWithNullAmount() {
-    UUID userId = UUID.randomUUID();
-    String name = "Test Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(6);
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-
-    assertThrows(IllegalArgumentException.class, () -> goal.calculateProgress(null));
-  }
-
-  @Test
-  void shouldThrowExceptionWhenCalculatingProgressWithDifferentCurrency() {
-    UUID userId = UUID.randomUUID();
-    String name = "BRL Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(6);
-    Money usdAmount = new Money(new BigDecimal("200.00"), Currency.getInstance("USD"));
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-
-    assertThrows(IllegalArgumentException.class, () -> goal.calculateProgress(usdAmount));
-  }
-
-  @Test
-  void shouldCalculateRemainingAmount() {
-    UUID userId = UUID.randomUUID();
-    String name = "Home Renovation";
-    Money targetAmount = new Money(new BigDecimal("10000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(12);
-    Money currentAmount = new Money(new BigDecimal("3000.00"), Currency.getInstance("BRL"));
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-    Money remaining = goal.calculateRemaining(currentAmount);
-
-    assertEquals(new Money(new BigDecimal("7000.00"), Currency.getInstance("BRL")), remaining);
-  }
-
-  @Test
-  void shouldReturnZeroRemainingWhenGoalIsReached() {
-    UUID userId = UUID.randomUUID();
-    String name = "Reached Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(3);
-    Money currentAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-    Money remaining = goal.calculateRemaining(currentAmount);
-
-    assertEquals(new Money(BigDecimal.ZERO, Currency.getInstance("BRL")), remaining);
-  }
-
-  @Test
-  void shouldReturnZeroRemainingWhenGoalIsExceeded() {
-    UUID userId = UUID.randomUUID();
-    String name = "Exceeded Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(3);
-    Money currentAmount = new Money(new BigDecimal("1500.00"), Currency.getInstance("BRL"));
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-    Money remaining = goal.calculateRemaining(currentAmount);
-
-    assertEquals(new Money(BigDecimal.ZERO, Currency.getInstance("BRL")), remaining);
-  }
-
-  @Test
-  void shouldThrowExceptionWhenCalculatingRemainingWithNullAmount() {
-    UUID userId = UUID.randomUUID();
-    String name = "Test Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(6);
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-
-    assertThrows(IllegalArgumentException.class, () -> goal.calculateRemaining(null));
-  }
-
-  @Test
-  void shouldThrowExceptionWhenCalculatingRemainingWithDifferentCurrency() {
-    UUID userId = UUID.randomUUID();
-    String name = "BRL Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(6);
-    Money eurAmount = new Money(new BigDecimal("200.00"), Currency.getInstance("EUR"));
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-
-    assertThrows(IllegalArgumentException.class, () -> goal.calculateRemaining(eurAmount));
-  }
-
-  @Test
-  void shouldCheckIfGoalIsReached() {
-    UUID userId = UUID.randomUUID();
-    String name = "Completed Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(3);
-    Money currentAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-
-    assertTrue(goal.isReached(currentAmount));
-  }
-
-  @Test
-  void shouldCheckIfGoalIsNotReached() {
-    UUID userId = UUID.randomUUID();
-    String name = "In Progress Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(3);
-    Money currentAmount = new Money(new BigDecimal("500.00"), Currency.getInstance("BRL"));
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-
-    assertFalse(goal.isReached(currentAmount));
-  }
-
-  @Test
-  void shouldConsiderGoalReachedWhenExceeded() {
-    UUID userId = UUID.randomUUID();
-    String name = "Exceeded Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(3);
-    Money currentAmount = new Money(new BigDecimal("1500.00"), Currency.getInstance("BRL"));
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-
-    assertTrue(goal.isReached(currentAmount));
-  }
-
-  @Test
-  void shouldCheckIfDeadlineHasPassed() {
-    UUID userId = UUID.randomUUID();
-    String name = "Past Deadline Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate yesterday = LocalDate.now().minusDays(1);
-
-    // This should fail in create, but let's test isDeadlinePassed for future deadline
-    LocalDate futureDeadline = LocalDate.now().plusDays(1);
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, futureDeadline);
-
-    assertFalse(goal.isDeadlinePassed());
-  }
-
-  @Test
-  void shouldCheckIfDeadlineIsToday() {
-    UUID userId = UUID.randomUUID();
-    String name = "Today Deadline Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate today = LocalDate.now();
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, today);
-
-    assertFalse(goal.isDeadlinePassed());
-  }
-
-  @Test
-  void shouldUpdateName() {
-    UUID userId = UUID.randomUUID();
-    String originalName = "Original Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(6);
-
-    FinancialGoal goal = FinancialGoal.create(userId, originalName, targetAmount, deadline);
-    String newName = "Updated Goal Name";
-
-    goal.updateName(newName);
-
-    assertEquals(newName, goal.getName());
-  }
-
-  @Test
-  void shouldThrowExceptionWhenUpdatingToNullName() {
-    UUID userId = UUID.randomUUID();
-    String name = "Valid Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(6);
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-
-    assertThrows(IllegalArgumentException.class, () -> goal.updateName(null));
-  }
-
-  @Test
-  void shouldThrowExceptionWhenUpdatingToEmptyName() {
-    UUID userId = UUID.randomUUID();
-    String name = "Valid Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(6);
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-
-    assertThrows(IllegalArgumentException.class, () -> goal.updateName(""));
-  }
-
-  @Test
-  void shouldUpdateTargetAmount() {
-    UUID userId = UUID.randomUUID();
-    String name = "Flexible Goal";
-    Money originalTarget = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(6);
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, originalTarget, deadline);
-    Money newTarget = new Money(new BigDecimal("2000.00"), Currency.getInstance("BRL"));
-
-    goal.updateTargetAmount(newTarget);
-
-    assertEquals(newTarget, goal.getTargetAmount());
-  }
-
-  @Test
-  void shouldThrowExceptionWhenUpdatingToNullTargetAmount() {
-    UUID userId = UUID.randomUUID();
-    String name = "Valid Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(6);
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-
-    assertThrows(IllegalArgumentException.class, () -> goal.updateTargetAmount(null));
-  }
-
-  @Test
-  void shouldUpdateDeadline() {
-    UUID userId = UUID.randomUUID();
-    String name = "Adjustable Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate originalDeadline = LocalDate.now().plusMonths(6);
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, originalDeadline);
-    LocalDate newDeadline = LocalDate.now().plusMonths(12);
-
-    goal.updateDeadline(newDeadline);
-
-    assertEquals(newDeadline, goal.getDeadline());
-  }
-
-  @Test
-  void shouldThrowExceptionWhenUpdatingToNullDeadline() {
-    UUID userId = UUID.randomUUID();
-    String name = "Valid Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(6);
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-
-    assertThrows(IllegalArgumentException.class, () -> goal.updateDeadline(null));
-  }
-
-  @Test
-  void shouldThrowExceptionWhenUpdatingToPastDeadline() {
-    UUID userId = UUID.randomUUID();
-    String name = "Valid Goal";
-    Money targetAmount = new Money(new BigDecimal("1000.00"), Currency.getInstance("BRL"));
-    LocalDate deadline = LocalDate.now().plusMonths(6);
-
-    FinancialGoal goal = FinancialGoal.create(userId, name, targetAmount, deadline);
-    LocalDate pastDate = LocalDate.now().minusDays(1);
-
-    assertThrows(IllegalArgumentException.class, () -> goal.updateDeadline(pastDate));
+  @Nested @DisplayName("Update Tests")
+  class UpdateTests {
+
+    @Test @DisplayName("Should update name successfully")
+    void shouldUpdateName() {
+      FinancialGoal goal = aGoal().withName("Original Goal").build();
+      String newName = "Updated Goal Name";
+
+      goal.updateName(newName);
+
+      assertEquals(newName, goal.getName());
+    }
+
+    @Test @DisplayName("Should throw exception when updating to null name")
+    void shouldRejectNullInNameUpdate() {
+      FinancialGoal goal = aGoal().build();
+
+      assertThrows(IllegalArgumentException.class, () -> goal.updateName(null));
+    }
+
+    @Test @DisplayName("Should throw exception when updating to empty name")
+    void shouldRejectEmptyInNameUpdate() {
+      FinancialGoal goal = aGoal().build();
+
+      assertThrows(IllegalArgumentException.class, () -> goal.updateName(""));
+    }
+
+    @Test @DisplayName("Should update target amount successfully")
+    void shouldUpdateTargetAmount() {
+      FinancialGoal goal = aGoal().withTargetAmount("1000.00").build();
+      Money newTarget = money("2000.00");
+
+      goal.updateTargetAmount(newTarget);
+
+      assertEquals(newTarget, goal.getTargetAmount());
+    }
+
+    @Test @DisplayName("Should throw exception when updating to null target amount")
+    void shouldRejectNullInTargetUpdate() {
+      FinancialGoal goal = aGoal().build();
+
+      assertThrows(IllegalArgumentException.class, () -> goal.updateTargetAmount(null));
+    }
+
+    @Test @DisplayName("Should update deadline successfully")
+    void shouldUpdateDeadline() {
+      LocalDate originalDeadline = LocalDate.now().plusMonths(6);
+      FinancialGoal goal = aGoal().withDeadline(originalDeadline).build();
+      LocalDate newDeadline = LocalDate.now().plusMonths(12);
+
+      goal.updateDeadline(newDeadline);
+
+      assertEquals(newDeadline, goal.getDeadline());
+    }
+
+    @Test @DisplayName("Should throw exception when updating to null deadline")
+    void shouldRejectNullInDeadlineUpdate() {
+      FinancialGoal goal = aGoal().build();
+
+      assertThrows(IllegalArgumentException.class, () -> goal.updateDeadline(null));
+    }
+
+    @Test @DisplayName("Should throw exception when updating to past deadline")
+    void shouldRejectPastInDeadlineUpdate() {
+      FinancialGoal goal = aGoal().build();
+      LocalDate pastDate = LocalDate.now().minusDays(1);
+
+      assertThrows(IllegalArgumentException.class, () -> goal.updateDeadline(pastDate));
+    }
   }
 }
