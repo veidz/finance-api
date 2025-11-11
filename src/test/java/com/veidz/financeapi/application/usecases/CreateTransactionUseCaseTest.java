@@ -45,6 +45,37 @@ class CreateTransactionUseCaseTest {
         categoryRepository);
   }
 
+  @Nested @DisplayName("Constructor Validation")
+  class ConstructorValidation {
+
+    @Test @DisplayName("should throw exception when transactionRepository is null")
+    void shouldThrowExceptionForNullTransactionRepository() {
+      // When & Then
+      IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+          () -> new CreateTransactionUseCase(null, userRepository, categoryRepository));
+
+      assertEquals("Transaction repository cannot be null", exception.getMessage());
+    }
+
+    @Test @DisplayName("should throw exception when userRepository is null")
+    void shouldThrowExceptionForNullUserRepository() {
+      // When & Then
+      IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+          () -> new CreateTransactionUseCase(transactionRepository, null, categoryRepository));
+
+      assertEquals("User repository cannot be null", exception.getMessage());
+    }
+
+    @Test @DisplayName("should throw exception when categoryRepository is null")
+    void shouldThrowExceptionForNullCategoryRepository() {
+      // When & Then
+      IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+          () -> new CreateTransactionUseCase(transactionRepository, userRepository, null));
+
+      assertEquals("Category repository cannot be null", exception.getMessage());
+    }
+  }
+
   @Nested @DisplayName("Successful Transaction Creation")
   class SuccessfulCreation {
 

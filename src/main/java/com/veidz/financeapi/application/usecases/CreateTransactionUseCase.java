@@ -13,7 +13,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Use case for creating a new transaction.
