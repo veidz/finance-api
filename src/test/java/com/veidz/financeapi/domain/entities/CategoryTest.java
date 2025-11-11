@@ -202,8 +202,8 @@ class CategoryTest {
     UUID parentCategoryId = UUID.randomUUID();
 
     Category parentCategory = Category.create(userId, "Parent", TransactionType.EXPENSE);
-    Category subcategory =
-        Category.create(userId, "Subcategory", TransactionType.EXPENSE, parentCategoryId);
+    Category subcategory = Category.create(userId, "Subcategory", TransactionType.EXPENSE,
+        parentCategoryId);
 
     // Then
     assertTrue(subcategory.isSubcategory());
