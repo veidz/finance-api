@@ -45,8 +45,8 @@ public class CreateUserUseCase {
     User savedUser = userRepository.save(user);
 
     // Map to response DTO
-    return new UserResponse(
-        savedUser.getId(), savedUser.getName(), savedUser.getEmail().getValue(), savedUser.getCreatedAt());
+    return new UserResponse(savedUser.getId(), savedUser.getName(), savedUser.getEmail().getValue(),
+        savedUser.getCreatedAt());
   }
 
   private void validateRequest(CreateUserRequest request) {
