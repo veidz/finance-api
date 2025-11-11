@@ -178,6 +178,14 @@
     <version>${rest-assured.version}</version>
     <scope>test</scope>
     </dependency>
+
+    <!-- SpotBugs Annotations (for suppressing false positives) -->
+    <dependency>
+    <groupId>com.github.spotbugs</groupId>
+    <artifactId>spotbugs-annotations</artifactId>
+    <version>4.8.3</version>
+    <optional>true</optional>
+    </dependency>
   </dependencies>
 
   <build>

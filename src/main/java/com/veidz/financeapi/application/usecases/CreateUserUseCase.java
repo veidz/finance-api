@@ -2,20 +2,30 @@ package com.veidz.financeapi.application.usecases;
 
 import com.veidz.financeapi.application.dto.CreateUserRequest;
 import com.veidz.financeapi.application.dto.UserResponse;
+import com.veidz.financeapi.application.ports.UserRepository;
 import com.veidz.financeapi.domain.entities.User;
-import com.veidz.financeapi.domain.repositories.UserRepository;
 import com.veidz.financeapi.domain.valueobjects.Email;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.Optional;
 
 /**
- * Use case for creating a new user. Follows Single Responsibility Principle: only creates users.
+ * Use case for creating a new user.
  *
- * @author Veidz
+ * <p>
+ * This use case handles the creation of a new user in the system, performing validations and
+ * ensuring uniqueness of email addresses.
  */
 public class CreateUserUseCase {
 
   private final UserRepository userRepository;
 
+  @SuppressFBWarnings(value = { "EI_EXPOSE_REP2",
+      "CT_CONSTRUCTOR_THROW" }, justification = "UserRepository is an interface injected by DI container. "
+          + "Constructor validation is required for fail-fast behavior.")
   public CreateUserUseCase(UserRepository userRepository) {
+    if (userRepository == null) {
+      throw new IllegalArgumentException("UserRepository cannot be null");
+    }
     this.userRepository = userRepository;
   }
 

@@ -6,8 +6,8 @@ import static org.mockito.Mockito.*;
 
 import com.veidz.financeapi.application.dto.CreateUserRequest;
 import com.veidz.financeapi.application.dto.UserResponse;
+import com.veidz.financeapi.application.ports.UserRepository;
 import com.veidz.financeapi.domain.entities.User;
-import com.veidz.financeapi.domain.repositories.UserRepository;
 import com.veidz.financeapi.domain.valueobjects.Email;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
