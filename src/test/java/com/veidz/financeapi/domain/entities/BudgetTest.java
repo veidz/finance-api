@@ -1,11 +1,6 @@
 package com.veidz.financeapi.domain.entities;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.veidz.financeapi.domain.valueobjects.DateRange;
 import com.veidz.financeapi.domain.valueobjects.Money;
@@ -13,369 +8,335 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Currency;
 import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-/**
- * Unit tests for Budget entity.
- *
- * @author Veidz
- */
+@DisplayName("Budget Entity Tests")
 class BudgetTest {
 
-  @Test
-  void shouldCreateBudgetWithRequiredFields() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    String name = "Monthly Groceries";
-    Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
+  // Test Data Builder
+  private static class TestDataBuilder {
+    private UUID userId = UUID.randomUUID();
+    private String name = "Test Budget";
+    private Money amount = money("1000.00");
+    private DateRange period = new DateRange(LocalDate.now().withDayOfMonth(1),
+        LocalDate.now().withDayOfMonth(1).plusMonths(1).minusDays(1));
+    private UUID categoryId = null;
 
-    // When
-    Budget budget = Budget.create(userId, name, amount, period);
+    TestDataBuilder withUserId(UUID userId) {
+      this.userId = userId;
+      return this;
+    }
 
-    // Then
-    assertNotNull(budget);
-    assertNotNull(budget.getId());
-    assertEquals(userId, budget.getUserId());
-    assertEquals(name, budget.getName());
-    assertEquals(amount, budget.getAmount());
-    assertEquals(period, budget.getPeriod());
-    assertNull(budget.getCategoryId());
-    assertNotNull(budget.getCreatedAt());
+    TestDataBuilder withName(String name) {
+      this.name = name;
+      return this;
+    }
+
+    TestDataBuilder withAmount(String amount) {
+      this.amount = money(amount);
+      return this;
+    }
+
+    TestDataBuilder withPeriod(LocalDate start, LocalDate end) {
+      this.period = new DateRange(start, end);
+      return this;
+    }
+
+    TestDataBuilder withCategoryId(UUID categoryId) {
+      this.categoryId = categoryId;
+      return this;
+    }
+
+    Budget build() {
+      return categoryId == null ? Budget.create(userId, name, amount, period)
+          : Budget.create(userId, name, amount, period, categoryId);
+    }
   }
 
-  @Test
-  void shouldCreateBudgetWithCategory() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    UUID categoryId = UUID.randomUUID();
-    String name = "Food Budget";
-    Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
-
-    // When
-    Budget budget = Budget.create(userId, name, amount, period, categoryId);
-
-    // Then
-    assertEquals(categoryId, budget.getCategoryId());
+  private static TestDataBuilder aBudget() {
+    return new TestDataBuilder();
   }
 
-  @Test
-  void shouldThrowExceptionWhenUserIdIsNull() {
-    // Given
-    String name = "Test Budget";
-    Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
-
-    // When & Then
-    assertThrows(IllegalArgumentException.class, () -> Budget.create(null, name, amount, period));
+  private static Money money(String amount) {
+    return new Money(new BigDecimal(amount), Currency.getInstance("USD"));
   }
 
-  @Test
-  void shouldThrowExceptionWhenNameIsNull() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
+  @Nested @DisplayName("Creation Tests")
+  class CreationTests {
 
-    // When & Then
-    assertThrows(IllegalArgumentException.class, () -> Budget.create(userId, null, amount, period));
+    @Test @DisplayName("Should create budget with required fields")
+    void shouldCreateWithRequiredFields() {
+      UUID userId = UUID.randomUUID();
+      String name = "Monthly Groceries";
+      Money amount = money("500.00");
+      DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
+
+      Budget budget = Budget.create(userId, name, amount, period);
+
+      assertNotNull(budget);
+      assertNotNull(budget.getId());
+      assertEquals(userId, budget.getUserId());
+      assertEquals(name, budget.getName());
+      assertEquals(amount, budget.getAmount());
+      assertEquals(period, budget.getPeriod());
+      assertNull(budget.getCategoryId());
+      assertNotNull(budget.getCreatedAt());
+    }
+
+    @Test @DisplayName("Should create budget with category")
+    void shouldCreateWithCategory() {
+      UUID categoryId = UUID.randomUUID();
+      Budget budget = aBudget().withCategoryId(categoryId).build();
+
+      assertEquals(categoryId, budget.getCategoryId());
+    }
+
+    @Test @DisplayName("Should throw exception when user ID is null")
+    void shouldRejectNullUserId() {
+      assertThrows(IllegalArgumentException.class, () -> aBudget().withUserId(null).build());
+    }
+
+    @Test @DisplayName("Should throw exception when name is null")
+    void shouldRejectNullName() {
+      assertThrows(IllegalArgumentException.class, () -> aBudget().withName(null).build());
+    }
+
+    @Test @DisplayName("Should throw exception when name is empty")
+    void shouldRejectEmptyName() {
+      assertThrows(IllegalArgumentException.class, () -> aBudget().withName("").build());
+    }
+
+    @Test @DisplayName("Should throw exception when name is blank")
+    void shouldRejectBlankName() {
+      assertThrows(IllegalArgumentException.class, () -> aBudget().withName("   ").build());
+    }
+
+    @Test @DisplayName("Should throw exception when amount is null")
+    void shouldRejectNullAmount() {
+      assertThrows(IllegalArgumentException.class, () -> Budget.create(UUID.randomUUID(), "Test",
+          null, new DateRange(LocalDate.now(), LocalDate.now().plusDays(1))));
+    }
+
+    @Test @DisplayName("Should throw exception when period is null")
+    void shouldRejectNullPeriod() {
+      assertThrows(IllegalArgumentException.class,
+          () -> Budget.create(UUID.randomUUID(), "Test", money("100.00"), null));
+    }
   }
 
-  @Test
-  void shouldThrowExceptionWhenNameIsEmpty() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
+  @Nested @DisplayName("Spending Calculation Tests")
+  class SpendingCalculationTests {
 
-    // When & Then
-    assertThrows(IllegalArgumentException.class, () -> Budget.create(userId, "", amount, period));
+    @Test @DisplayName("Should calculate remaining amount correctly")
+    void shouldCalculateRemaining() {
+      Budget budget = aBudget().withAmount("1000.00").build();
+      Money spent = money("300.00");
+
+      BigDecimal remaining = budget.calculateRemaining(spent);
+
+      assertEquals(new BigDecimal("700.00"), remaining);
+    }
+
+    @Test @DisplayName("Should return zero when budget equals spending")
+    void shouldReturnZeroWhenEqual() {
+      Budget budget = aBudget().withAmount("1000.00").build();
+      Money spent = money("1000.00");
+
+      BigDecimal remaining = budget.calculateRemaining(spent);
+
+      assertEquals(new BigDecimal("0.00"), remaining);
+    }
+
+    @Test @DisplayName("Should return negative when overspent")
+    void shouldReturnNegativeWhenOverspent() {
+      Budget budget = aBudget().withAmount("1000.00").build();
+      Money spent = money("1500.00");
+
+      BigDecimal remaining = budget.calculateRemaining(spent);
+
+      assertEquals(new BigDecimal("-500.00"), remaining);
+    }
+
+    @Test @DisplayName("Should throw exception when calculating with null spent amount")
+    void shouldRejectNullInRemaining() {
+      Budget budget = aBudget().build();
+
+      assertThrows(IllegalArgumentException.class, () -> budget.calculateRemaining(null));
+    }
+
+    @Test @DisplayName("Should throw exception when calculating with different currency")
+    void shouldRejectDifferentCurrencyInRemaining() {
+      Budget budget = aBudget().build();
+      Money eurSpent = new Money(new BigDecimal("100.00"), Currency.getInstance("EUR"));
+
+      assertThrows(IllegalArgumentException.class, () -> budget.calculateRemaining(eurSpent));
+    }
+
+    @Test @DisplayName("Should calculate percentage used correctly")
+    void shouldCalculatePercentageUsed() {
+      Budget budget = aBudget().withAmount("1000.00").build();
+      Money spent = money("250.00");
+
+      BigDecimal percentage = budget.calculatePercentageUsed(spent);
+
+      assertEquals(new BigDecimal("25.00"), percentage);
+    }
+
+    @Test @DisplayName("Should return 100% when fully used")
+    void shouldReturnFullPercentage() {
+      Budget budget = aBudget().withAmount("1000.00").build();
+      Money spent = money("1000.00");
+
+      BigDecimal percentage = budget.calculatePercentageUsed(spent);
+
+      assertEquals(new BigDecimal("100.00"), percentage);
+    }
+
+    @Test @DisplayName("Should allow percentage over 100%")
+    void shouldAllowPercentageOverOneHundred() {
+      Budget budget = aBudget().withAmount("1000.00").build();
+      Money spent = money("1500.00");
+
+      BigDecimal percentage = budget.calculatePercentageUsed(spent);
+
+      assertEquals(new BigDecimal("150.00"), percentage);
+    }
+
+    @Test @DisplayName("Should return zero percentage for zero spending")
+    void shouldReturnZeroPercentageForZero() {
+      Budget budget = aBudget().build();
+      Money spent = money("0.00");
+
+      BigDecimal percentage = budget.calculatePercentageUsed(spent);
+
+      assertEquals(new BigDecimal("0.00"), percentage);
+    }
+
+    @Test @DisplayName("Should throw exception when calculating percentage with null")
+    void shouldRejectNullInPercentage() {
+      Budget budget = aBudget().build();
+
+      assertThrows(IllegalArgumentException.class, () -> budget.calculatePercentageUsed(null));
+    }
+
+    @Test @DisplayName("Should throw exception when calculating percentage with different currency")
+    void shouldRejectDifferentCurrencyInPercentage() {
+      Budget budget = aBudget().build();
+      Money eurSpent = new Money(new BigDecimal("100.00"), Currency.getInstance("EUR"));
+
+      assertThrows(IllegalArgumentException.class, () -> budget.calculatePercentageUsed(eurSpent));
+    }
   }
 
-  @Test
-  void shouldThrowExceptionWhenNameIsBlank() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
+  @Nested @DisplayName("Budget Status Tests")
+  class BudgetStatusTests {
 
-    // When & Then
-    assertThrows(IllegalArgumentException.class,
-        () -> Budget.create(userId, "   ", amount, period));
+    @Test @DisplayName("Should recognize when budget is exceeded")
+    void shouldRecognizeExceeded() {
+      Budget budget = aBudget().withAmount("1000.00").build();
+      Money spent = money("1500.00");
+
+      assertTrue(budget.isExceeded(spent));
+    }
+
+    @Test @DisplayName("Should recognize when budget is not exceeded")
+    void shouldRecognizeNotExceeded() {
+      Budget budget = aBudget().withAmount("1000.00").build();
+      Money spent = money("500.00");
+
+      assertFalse(budget.isExceeded(spent));
+    }
+
+    @Test @DisplayName("Should not be exceeded when equal to budget")
+    void shouldNotBeExceededWhenEqual() {
+      Budget budget = aBudget().withAmount("1000.00").build();
+      Money spent = money("1000.00");
+
+      assertFalse(budget.isExceeded(spent));
+    }
+
+    @Test @DisplayName("Should check if budget is active for current date")
+    void shouldCheckActive() {
+      LocalDate today = LocalDate.now();
+      Budget budget = aBudget().withPeriod(today.minusDays(1), today.plusDays(1)).build();
+
+      assertTrue(budget.isActive());
+    }
+
+    @Test @DisplayName("Should check if budget is not active for past period")
+    void shouldCheckNotActive() {
+      LocalDate pastStart = LocalDate.now().minusMonths(2);
+      LocalDate pastEnd = LocalDate.now().minusMonths(1);
+      Budget budget = aBudget().withPeriod(pastStart, pastEnd).build();
+
+      assertFalse(budget.isActive());
+    }
   }
 
-  @Test
-  void shouldThrowExceptionWhenAmountIsNull() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    String name = "Test Budget";
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
+  @Nested @DisplayName("Update Tests")
+  class UpdateTests {
 
-    // When & Then
-    assertThrows(IllegalArgumentException.class, () -> Budget.create(userId, name, null, period));
-  }
+    @Test @DisplayName("Should update name successfully")
+    void shouldUpdateName() {
+      Budget budget = aBudget().withName("Original Name").build();
+      String newName = "Updated Name";
 
-  @Test
-  void shouldThrowExceptionWhenAmountIsZero() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    String name = "Test Budget";
-    Money amount = Money.zero(Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
+      budget.updateName(newName);
 
-    // When & Then
-    assertThrows(IllegalArgumentException.class, () -> Budget.create(userId, name, amount, period));
-  }
+      assertEquals(newName, budget.getName());
+    }
 
-  @Test
-  void shouldThrowExceptionWhenPeriodIsNull() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    String name = "Test Budget";
-    Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
+    @Test @DisplayName("Should throw exception when updating to null name")
+    void shouldRejectNullInNameUpdate() {
+      Budget budget = aBudget().build();
 
-    // When & Then
-    assertThrows(IllegalArgumentException.class, () -> Budget.create(userId, name, amount, null));
-  }
+      assertThrows(IllegalArgumentException.class, () -> budget.updateName(null));
+    }
 
-  @Test
-  void shouldTrimBudgetName() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    String name = "  Monthly Budget  ";
-    Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
+    @Test @DisplayName("Should throw exception when updating to empty name")
+    void shouldRejectEmptyInNameUpdate() {
+      Budget budget = aBudget().build();
 
-    // When
-    Budget budget = Budget.create(userId, name, amount, period);
+      assertThrows(IllegalArgumentException.class, () -> budget.updateName(""));
+    }
 
-    // Then
-    assertEquals("Monthly Budget", budget.getName());
-  }
+    @Test @DisplayName("Should update amount successfully")
+    void shouldUpdateAmount() {
+      Budget budget = aBudget().withAmount("1000.00").build();
+      Money newAmount = money("2000.00");
 
-  @Test
-  void shouldUpdateBudgetName() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
-    Budget budget = Budget.create(userId, "Old Name", amount, period);
+      budget.updateAmount(newAmount);
 
-    // When
-    budget.updateName("New Name");
+      assertEquals(newAmount, budget.getAmount());
+    }
 
-    // Then
-    assertEquals("New Name", budget.getName());
-  }
+    @Test @DisplayName("Should throw exception when updating to null amount")
+    void shouldRejectNullInAmountUpdate() {
+      Budget budget = aBudget().build();
 
-  @Test
-  void shouldThrowExceptionWhenUpdatingNameToNull() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
-    Budget budget = Budget.create(userId, "Old Name", amount, period);
+      assertThrows(IllegalArgumentException.class, () -> budget.updateAmount(null));
+    }
 
-    // When & Then
-    assertThrows(IllegalArgumentException.class, () -> budget.updateName(null));
-  }
+    @Test @DisplayName("Should set category ID successfully")
+    void shouldSetCategoryId() {
+      Budget budget = aBudget().build();
+      UUID categoryId = UUID.randomUUID();
 
-  @Test
-  void shouldUpdateBudgetAmount() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
-    Budget budget = Budget.create(userId, "Monthly Budget", amount, period);
+      budget.setCategoryId(categoryId);
 
-    Money newAmount = new Money(BigDecimal.valueOf(750.00), Currency.getInstance("USD"));
+      assertEquals(categoryId, budget.getCategoryId());
+    }
 
-    // When
-    budget.updateAmount(newAmount);
+    @Test @DisplayName("Should clear category ID with null")
+    void shouldClearCategoryId() {
+      UUID categoryId = UUID.randomUUID();
+      Budget budget = aBudget().withCategoryId(categoryId).build();
 
-    // Then
-    assertEquals(newAmount, budget.getAmount());
-  }
+      budget.setCategoryId(null);
 
-  @Test
-  void shouldThrowExceptionWhenUpdatingAmountToNull() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
-    Budget budget = Budget.create(userId, "Monthly Budget", amount, period);
-
-    // When & Then
-    assertThrows(IllegalArgumentException.class, () -> budget.updateAmount(null));
-  }
-
-  @Test
-  void shouldThrowExceptionWhenUpdatingAmountToZero() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
-    Budget budget = Budget.create(userId, "Monthly Budget", amount, period);
-
-    Money zeroAmount = Money.zero(Currency.getInstance("USD"));
-
-    // When & Then
-    assertThrows(IllegalArgumentException.class, () -> budget.updateAmount(zeroAmount));
-  }
-
-  @Test
-  void shouldSetCategoryId() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    UUID categoryId = UUID.randomUUID();
-    Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
-    Budget budget = Budget.create(userId, "Monthly Budget", amount, period);
-
-    // When
-    budget.setCategoryId(categoryId);
-
-    // Then
-    assertEquals(categoryId, budget.getCategoryId());
-  }
-
-  @Test
-  void shouldAllowNullCategoryId() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    UUID categoryId = UUID.randomUUID();
-    Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
-    Budget budget = Budget.create(userId, "Monthly Budget", amount, period, categoryId);
-
-    // When
-    budget.setCategoryId(null);
-
-    // Then
-    assertNull(budget.getCategoryId());
-  }
-
-  @Test
-  void shouldCheckIfBudgetIsActive() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    Money amount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange activePeriod = new DateRange(LocalDate.now().minusDays(5),
-        LocalDate.now().plusDays(5));
-    Budget activeBudget = Budget.create(userId, "Active Budget", amount, activePeriod);
-
-    DateRange pastPeriod = new DateRange(LocalDate.now().minusDays(30),
-        LocalDate.now().minusDays(1));
-    Budget pastBudget = Budget.create(userId, "Past Budget", amount, pastPeriod);
-
-    DateRange futurePeriod = new DateRange(LocalDate.now().plusDays(1),
-        LocalDate.now().plusDays(30));
-    Budget futureBudget = Budget.create(userId, "Future Budget", amount, futurePeriod);
-
-    // Then
-    assertTrue(activeBudget.isActive());
-    assertFalse(pastBudget.isActive());
-    assertFalse(futureBudget.isActive());
-  }
-
-  @Test
-  void shouldCalculateRemainingAmount() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    Money budgetAmount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
-    Budget budget = Budget.create(userId, "Monthly Budget", budgetAmount, period);
-
-    Money spent = new Money(BigDecimal.valueOf(200.00), Currency.getInstance("USD"));
-
-    // When
-    BigDecimal remaining = budget.calculateRemaining(spent);
-
-    // Then
-    assertEquals(0, remaining.compareTo(BigDecimal.valueOf(300.00)));
-  }
-
-  @Test
-  void shouldCalculateRemainingAmountWhenOverBudget() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    Money budgetAmount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
-    Budget budget = Budget.create(userId, "Monthly Budget", budgetAmount, period);
-
-    Money spent = new Money(BigDecimal.valueOf(600.00), Currency.getInstance("USD"));
-
-    // When
-    BigDecimal remaining = budget.calculateRemaining(spent);
-
-    // Then
-    assertEquals(0, remaining.compareTo(BigDecimal.valueOf(-100.00)));
-  }
-
-  @Test
-  void shouldThrowExceptionWhenCalculatingRemainingWithDifferentCurrency() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    Money budgetAmount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
-    Budget budget = Budget.create(userId, "Monthly Budget", budgetAmount, period);
-
-    Money spentEur = new Money(BigDecimal.valueOf(200.00), Currency.getInstance("EUR"));
-
-    // When & Then
-    assertThrows(IllegalArgumentException.class, () -> budget.calculateRemaining(spentEur));
-  }
-
-  @Test
-  void shouldCalculatePercentageUsed() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    Money budgetAmount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
-    Budget budget = Budget.create(userId, "Monthly Budget", budgetAmount, period);
-
-    Money spent = new Money(BigDecimal.valueOf(250.00), Currency.getInstance("USD"));
-
-    // When
-    BigDecimal percentage = budget.calculatePercentageUsed(spent);
-
-    // Then
-    assertEquals(0, percentage.compareTo(BigDecimal.valueOf(50.00)));
-  }
-
-  @Test
-  void shouldCalculatePercentageUsedWhenOverBudget() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    Money budgetAmount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
-    Budget budget = Budget.create(userId, "Monthly Budget", budgetAmount, period);
-
-    Money spent = new Money(BigDecimal.valueOf(750.00), Currency.getInstance("USD"));
-
-    // When
-    BigDecimal percentage = budget.calculatePercentageUsed(spent);
-
-    // Then
-    assertEquals(0, percentage.compareTo(BigDecimal.valueOf(150.00)));
-  }
-
-  @Test
-  void shouldCheckIfBudgetIsExceeded() {
-    // Given
-    UUID userId = UUID.randomUUID();
-    Money budgetAmount = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    DateRange period = new DateRange(LocalDate.of(2025, 11, 1), LocalDate.of(2025, 11, 30));
-    Budget budget = Budget.create(userId, "Monthly Budget", budgetAmount, period);
-
-    Money underSpent = new Money(BigDecimal.valueOf(400.00), Currency.getInstance("USD"));
-    Money exactSpent = new Money(BigDecimal.valueOf(500.00), Currency.getInstance("USD"));
-    Money overSpent = new Money(BigDecimal.valueOf(600.00), Currency.getInstance("USD"));
-
-    // Then
-    assertFalse(budget.isExceeded(underSpent));
-    assertFalse(budget.isExceeded(exactSpent));
-    assertTrue(budget.isExceeded(overSpent));
+      assertNull(budget.getCategoryId());
+    }
   }
 }

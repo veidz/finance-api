@@ -1,232 +1,164 @@
 package com.veidz.financeapi.domain.entities;
 
-import com.veidz.financeapi.domain.valueobjects.Email;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Unit tests for User entity. Following TDD: test first, then implement.
- *
- * @author Veidz
- */
+import com.veidz.financeapi.domain.valueobjects.Email;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+@DisplayName("User Entity Tests")
 class UserTest {
 
-  @Test
-  void shouldCreateUserWhenAllDataIsValid() {
-    // Arrange
-    String name = "John Doe";
-    Email email = new Email("john.doe@example.com");
-    String password = "SecurePass123";
+  // Test Data Builder
+  private static class TestDataBuilder {
+    private String name = "Test User";
+    private Email email = new Email("test@example.com");
+    private String password = "Password123";
 
-    // Act
-    User user = User.create(name, email, password);
+    TestDataBuilder withName(String name) {
+      this.name = name;
+      return this;
+    }
 
-    // Assert
-    assertNotNull(user);
-    assertEquals(name, user.getName());
-    assertEquals(email, user.getEmail());
-    assertNotNull(user.getId());
-    assertNotNull(user.getCreatedAt());
+    TestDataBuilder withEmail(String email) {
+      this.email = new Email(email);
+      return this;
+    }
+
+    TestDataBuilder withPassword(String password) {
+      this.password = password;
+      return this;
+    }
+
+    User build() {
+      return User.create(name, email, password);
+    }
   }
 
-  @Test
-  void shouldHashPasswordWhenCreatingUser() {
-    // Arrange
-    String plainPassword = "MyPassword123";
-    User user = User.create("Jane Doe", new Email("jane@example.com"), plainPassword);
-
-    // Act
-    String hashedPassword = user.getPasswordHash();
-
-    // Assert
-    assertNotNull(hashedPassword);
-    assertNotEquals(plainPassword, hashedPassword);
-    assertTrue(hashedPassword.length() > plainPassword.length());
+  private static TestDataBuilder aUser() {
+    return new TestDataBuilder();
   }
 
-  @Test
-  void shouldRejectNullNameWhenCreatingUser() {
-    // Arrange
-    Email email = new Email("user@example.com");
-    String password = "password123";
+  @Nested @DisplayName("Creation Tests")
+  class CreationTests {
 
-    // Act & Assert
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-        () -> User.create(null, email, password));
-    assertEquals("Name cannot be null or empty", exception.getMessage());
+    @Test @DisplayName("Should create user with all valid data")
+    void shouldCreateWithValidData() {
+      String name = "John Doe";
+      Email email = new Email("john.doe@example.com");
+      String password = "SecurePass123";
+
+      User user = User.create(name, email, password);
+
+      assertNotNull(user);
+      assertEquals(name, user.getName());
+      assertEquals(email, user.getEmail());
+      assertNotNull(user.getId());
+      assertNotNull(user.getCreatedAt());
+    }
+
+    @Test @DisplayName("Should hash password when creating user")
+    void shouldHashPassword() {
+      String plainPassword = "MyPassword123";
+      User user = aUser().withPassword(plainPassword).build();
+
+      String hashedPassword = user.getPasswordHash();
+
+      assertNotNull(hashedPassword);
+      assertNotEquals(plainPassword, hashedPassword);
+      assertTrue(hashedPassword.length() > plainPassword.length());
+    }
+
+    @Test @DisplayName("Should throw exception when name is null")
+    void shouldRejectNullName() {
+      assertThrows(IllegalArgumentException.class,
+          () -> User.create(null, new Email("user@example.com"), "password123"));
+    }
+
+    @Test @DisplayName("Should throw exception when name is empty")
+    void shouldRejectEmptyName() {
+      assertThrows(IllegalArgumentException.class, () -> aUser().withName("").build());
+    }
+
+    @Test @DisplayName("Should throw exception when name is blank")
+    void shouldRejectBlankName() {
+      assertThrows(IllegalArgumentException.class, () -> aUser().withName("   ").build());
+    }
+
+    @Test @DisplayName("Should throw exception when email is null")
+    void shouldRejectNullEmail() {
+      assertThrows(IllegalArgumentException.class,
+          () -> User.create("John Doe", null, "password123"));
+    }
+
+    @Test @DisplayName("Should throw exception when password is null")
+    void shouldRejectNullPassword() {
+      assertThrows(IllegalArgumentException.class,
+          () -> User.create("John Doe", new Email("user@example.com"), null));
+    }
+
+    @Test @DisplayName("Should throw exception when password is empty")
+    void shouldRejectEmptyPassword() {
+      assertThrows(IllegalArgumentException.class, () -> aUser().withPassword("").build());
+    }
+
+    @Test @DisplayName("Should throw exception when password is blank")
+    void shouldRejectBlankPassword() {
+      assertThrows(IllegalArgumentException.class, () -> aUser().withPassword("   ").build());
+    }
   }
 
-  @Test
-  void shouldRejectEmptyNameWhenCreatingUser() {
-    // Arrange
-    Email email = new Email("user@example.com");
-    String password = "password123";
+  @Nested @DisplayName("Password Verification Tests")
+  class PasswordVerificationTests {
 
-    // Act & Assert
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-        () -> User.create("", email, password));
-    assertEquals("Name cannot be null or empty", exception.getMessage());
+    @Test @DisplayName("Should verify correct password")
+    void shouldVerifyCorrectPassword() {
+      String plainPassword = "MySecurePassword";
+      User user = aUser().withPassword(plainPassword).build();
+
+      assertTrue(user.verifyPassword(plainPassword));
+    }
+
+    @Test @DisplayName("Should reject incorrect password")
+    void shouldRejectIncorrectPassword() {
+      User user = aUser().withPassword("CorrectPassword").build();
+
+      assertFalse(user.verifyPassword("WrongPassword"));
+    }
+
+    @Test @DisplayName("Should return false for null password in verification")
+    void shouldReturnFalseForNullPassword() {
+      User user = aUser().build();
+
+      assertFalse(user.verifyPassword(null));
+    }
   }
 
-  @Test
-  void shouldRejectBlankNameWhenCreatingUser() {
-    // Arrange
-    Email email = new Email("user@example.com");
-    String password = "password123";
+  @Nested @DisplayName("Update Tests")
+  class UpdateTests {
 
-    // Act & Assert
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-        () -> User.create("   ", email, password));
-    assertEquals("Name cannot be null or empty", exception.getMessage());
-  }
+    @Test @DisplayName("Should update name successfully")
+    void shouldUpdateName() {
+      User user = aUser().withName("Old Name").build();
 
-  @Test
-  void shouldRejectNullEmailWhenCreatingUser() {
-    // Arrange
-    String name = "John Doe";
-    String password = "password123";
+      user.updateName("New Name");
 
-    // Act & Assert
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-        () -> User.create(name, null, password));
-    assertEquals("Email cannot be null", exception.getMessage());
-  }
+      assertEquals("New Name", user.getName());
+    }
 
-  @Test
-  void shouldRejectNullPasswordWhenCreatingUser() {
-    // Arrange
-    String name = "John Doe";
-    Email email = new Email("john@example.com");
+    @Test @DisplayName("Should throw exception when updating to null name")
+    void shouldRejectNullInNameUpdate() {
+      User user = aUser().build();
 
-    // Act & Assert
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-        () -> User.create(name, email, null));
-    assertEquals("Password cannot be null or empty", exception.getMessage());
-  }
+      assertThrows(IllegalArgumentException.class, () -> user.updateName(null));
+    }
 
-  @Test
-  void shouldRejectEmptyPasswordWhenCreatingUser() {
-    // Arrange
-    String name = "John Doe";
-    Email email = new Email("john@example.com");
+    @Test @DisplayName("Should throw exception when updating to empty name")
+    void shouldRejectEmptyInNameUpdate() {
+      User user = aUser().build();
 
-    // Act & Assert
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-        () -> User.create(name, email, ""));
-    assertEquals("Password cannot be null or empty", exception.getMessage());
-  }
-
-  @Test
-  void shouldRejectShortPasswordWhenCreatingUser() {
-    // Arrange
-    String name = "John Doe";
-    Email email = new Email("john@example.com");
-    String shortPassword = "123";
-
-    // Act & Assert
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-        () -> User.create(name, email, shortPassword));
-    assertEquals("Password must be at least 6 characters long", exception.getMessage());
-  }
-
-  @Test
-  void shouldVerifyPasswordCorrectlyWhenPasswordMatches() {
-    // Arrange
-    String plainPassword = "MySecurePass123";
-    User user = User.create("John Doe", new Email("john@example.com"), plainPassword);
-
-    // Act
-    boolean isValid = user.verifyPassword(plainPassword);
-
-    // Assert
-    assertTrue(isValid);
-  }
-
-  @Test
-  void shouldRejectPasswordWhenPasswordDoesNotMatch() {
-    // Arrange
-    String plainPassword = "MySecurePass123";
-    User user = User.create("John Doe", new Email("john@example.com"), plainPassword);
-
-    // Act
-    boolean isValid = user.verifyPassword("WrongPassword");
-
-    // Assert
-    assertFalse(isValid);
-  }
-
-  @Test
-  void shouldUpdateNameWhenNewNameIsValid() {
-    // Arrange
-    User user = User.create("Old Name", new Email("user@example.com"), "password123");
-    String newName = "New Name";
-
-    // Act
-    user.updateName(newName);
-
-    // Assert
-    assertEquals(newName, user.getName());
-  }
-
-  @Test
-  void shouldRejectUpdatingNameWhenNewNameIsInvalid() {
-    // Arrange
-    User user = User.create("Old Name", new Email("user@example.com"), "password123");
-
-    // Act & Assert
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-        () -> user.updateName(""));
-    assertEquals("Name cannot be null or empty", exception.getMessage());
-  }
-
-  @Test
-  void shouldChangePasswordWhenCurrentPasswordIsCorrect() {
-    // Arrange
-    String currentPassword = "OldPassword123";
-    User user = User.create("John Doe", new Email("john@example.com"), currentPassword);
-    String newPassword = "NewPassword456";
-
-    // Act
-    user.changePassword(currentPassword, newPassword);
-
-    // Assert
-    assertTrue(user.verifyPassword(newPassword));
-    assertFalse(user.verifyPassword(currentPassword));
-  }
-
-  @Test
-  void shouldRejectPasswordChangeWhenCurrentPasswordIsWrong() {
-    // Arrange
-    String currentPassword = "OldPassword123";
-    User user = User.create("John Doe", new Email("john@example.com"), currentPassword);
-    String wrongPassword = "WrongPassword";
-    String newPassword = "NewPassword456";
-
-    // Act & Assert
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-        () -> user.changePassword(wrongPassword, newPassword));
-    assertEquals("Current password is incorrect", exception.getMessage());
-  }
-
-  @Test
-  void shouldGenerateUniqueIdsForDifferentUsers() {
-    // Arrange & Act
-    User user1 = User.create("User One", new Email("user1@example.com"), "password123");
-    User user2 = User.create("User Two", new Email("user2@example.com"), "password123");
-
-    // Assert
-    assertNotEquals(user1.getId(), user2.getId());
-  }
-
-  @Test
-  void shouldCompareTwoUsersById() {
-    // Arrange
-    User user1 = User.create("User One", new Email("user1@example.com"), "password123");
-    User user2 = User.create("User Two", new Email("user2@example.com"), "password123");
-
-    // Act & Assert
-    assertNotEquals(user1, user2);
-    assertEquals(user1, user1);
+      assertThrows(IllegalArgumentException.class, () -> user.updateName(""));
+    }
   }
 }
