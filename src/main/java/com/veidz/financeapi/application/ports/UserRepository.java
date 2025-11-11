@@ -8,7 +8,8 @@ import java.util.UUID;
 /**
  * Repository interface for {@link User} entity.
  *
- * <p>This port defines the contract for persisting and retrieving users. Implementations should be
+ * <p>
+ * This port defines the contract for persisting and retrieving users. Implementations should be
  * provided in the infrastructure layer.
  */
 public interface UserRepository {
