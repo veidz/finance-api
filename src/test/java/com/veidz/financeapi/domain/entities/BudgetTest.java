@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.veidz.financeapi.domain.enums.TransactionType;
 import com.veidz.financeapi.domain.valueobjects.DateRange;
 import com.veidz.financeapi.domain.valueobjects.Money;
 import java.math.BigDecimal;
