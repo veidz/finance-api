@@ -18,11 +18,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
-@DisplayName("AuthenticateUserUseCase Tests")
+@ExtendWith(MockitoExtension.class) @DisplayName("AuthenticateUserUseCase Tests")
 class AuthenticateUserUseCaseTest {
 
-  @Mock private UserRepository userRepository;
+  @Mock
+  private UserRepository userRepository;
 
   private AuthenticateUserUseCase authenticateUserUseCase;
 
@@ -31,12 +31,10 @@ class AuthenticateUserUseCaseTest {
     authenticateUserUseCase = new AuthenticateUserUseCase(userRepository);
   }
 
-  @Nested
-  @DisplayName("Successful Authentication")
+  @Nested @DisplayName("Successful Authentication")
   class SuccessfulAuthentication {
 
-    @Test
-    @DisplayName("should authenticate user with correct credentials")
+    @Test @DisplayName("should authenticate user with correct credentials")
     void shouldAuthenticateWithCorrectCredentials() {
       // Given
       String email = "john@example.com";
@@ -59,8 +57,7 @@ class AuthenticateUserUseCaseTest {
       verify(userRepository).findByEmail(any(Email.class));
     }
 
-    @Test
-    @DisplayName("should verify password correctly")
+    @Test @DisplayName("should verify password correctly")
     void shouldVerifyPasswordCorrectly() {
       // Given
       String email = "jane@example.com";
@@ -80,12 +77,10 @@ class AuthenticateUserUseCaseTest {
     }
   }
 
-  @Nested
-  @DisplayName("Authentication Failures")
+  @Nested @DisplayName("Authentication Failures")
   class AuthenticationFailures {
 
-    @Test
-    @DisplayName("should throw exception when password is incorrect")
+    @Test @DisplayName("should throw exception when password is incorrect")
     void shouldThrowExceptionForWrongPassword() {
       // Given
       String email = "john@example.com";
@@ -98,16 +93,14 @@ class AuthenticateUserUseCaseTest {
       AuthenticationRequest request = new AuthenticationRequest(email, wrongPassword);
 
       // When & Then
-      IllegalArgumentException exception =
-          assertThrows(
-              IllegalArgumentException.class, () -> authenticateUserUseCase.execute(request));
+      IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+          () -> authenticateUserUseCase.execute(request));
 
       assertEquals("Invalid credentials", exception.getMessage());
       verify(userRepository).findByEmail(any(Email.class));
     }
 
-    @Test
-    @DisplayName("should throw exception when email does not exist")
+    @Test @DisplayName("should throw exception when email does not exist")
     void shouldThrowExceptionForNonExistentEmail() {
       // Given
       String email = "nonexistent@example.com";
@@ -118,69 +111,60 @@ class AuthenticateUserUseCaseTest {
       AuthenticationRequest request = new AuthenticationRequest(email, password);
 
       // When & Then
-      IllegalArgumentException exception =
-          assertThrows(
-              IllegalArgumentException.class, () -> authenticateUserUseCase.execute(request));
+      IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+          () -> authenticateUserUseCase.execute(request));
 
       assertEquals("Invalid credentials", exception.getMessage());
       verify(userRepository).findByEmail(any(Email.class));
     }
 
-    @Test
-    @DisplayName("should throw exception when email is null")
+    @Test @DisplayName("should throw exception when email is null")
     void shouldThrowExceptionForNullEmail() {
       // Given
       AuthenticationRequest request = new AuthenticationRequest(null, "password");
 
       // When & Then
-      IllegalArgumentException exception =
-          assertThrows(
-              IllegalArgumentException.class, () -> authenticateUserUseCase.execute(request));
+      IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+          () -> authenticateUserUseCase.execute(request));
 
       assertEquals("Email and password are required", exception.getMessage());
       verify(userRepository, never()).findByEmail(any(Email.class));
     }
 
-    @Test
-    @DisplayName("should throw exception when email is empty")
+    @Test @DisplayName("should throw exception when email is empty")
     void shouldThrowExceptionForEmptyEmail() {
       // Given
       AuthenticationRequest request = new AuthenticationRequest("", "password");
 
       // When & Then
-      IllegalArgumentException exception =
-          assertThrows(
-              IllegalArgumentException.class, () -> authenticateUserUseCase.execute(request));
+      IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+          () -> authenticateUserUseCase.execute(request));
 
       assertEquals("Email and password are required", exception.getMessage());
       verify(userRepository, never()).findByEmail(any(Email.class));
     }
 
-    @Test
-    @DisplayName("should throw exception when password is null")
+    @Test @DisplayName("should throw exception when password is null")
     void shouldThrowExceptionForNullPassword() {
       // Given
       AuthenticationRequest request = new AuthenticationRequest("john@example.com", null);
 
       // When & Then
-      IllegalArgumentException exception =
-          assertThrows(
-              IllegalArgumentException.class, () -> authenticateUserUseCase.execute(request));
+      IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+          () -> authenticateUserUseCase.execute(request));
 
       assertEquals("Email and password are required", exception.getMessage());
       verify(userRepository, never()).findByEmail(any(Email.class));
     }
 
-    @Test
-    @DisplayName("should throw exception when password is empty")
+    @Test @DisplayName("should throw exception when password is empty")
     void shouldThrowExceptionForEmptyPassword() {
       // Given
       AuthenticationRequest request = new AuthenticationRequest("john@example.com", "");
 
       // When & Then
-      IllegalArgumentException exception =
-          assertThrows(
-              IllegalArgumentException.class, () -> authenticateUserUseCase.execute(request));
+      IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+          () -> authenticateUserUseCase.execute(request));
 
       assertEquals("Email and password are required", exception.getMessage());
       verify(userRepository, never()).findByEmail(any(Email.class));

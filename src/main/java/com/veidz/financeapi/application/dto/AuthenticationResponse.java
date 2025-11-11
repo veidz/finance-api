@@ -10,4 +10,5 @@ import java.util.UUID;
  * @param email the user's email address
  * @param token JWT authentication token (to be added when JWT is implemented)
  */
-public record AuthenticationResponse(UUID userId, String name, String email, String token) {}
+public record AuthenticationResponse(UUID userId, String name, String email, String token) {
+}

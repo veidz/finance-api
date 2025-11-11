@@ -19,11 +19,9 @@ public class AuthenticateUserUseCase {
 
   private final UserRepository userRepository;
 
-  @SuppressFBWarnings(
-      value = {"EI_EXPOSE_REP2", "CT_CONSTRUCTOR_THROW"},
-      justification =
-          "UserRepository is an interface injected by DI container. "
-              + "Constructor validation is required for fail-fast behavior.")
+  @SuppressFBWarnings(value = { "EI_EXPOSE_REP2",
+      "CT_CONSTRUCTOR_THROW" }, justification = "UserRepository is an interface injected by DI container. "
+          + "Constructor validation is required for fail-fast behavior.")
   public AuthenticateUserUseCase(UserRepository userRepository) {
     if (userRepository == null) {
       throw new IllegalArgumentException("UserRepository cannot be null");
@@ -57,14 +55,12 @@ public class AuthenticateUserUseCase {
     // TODO: Generate JWT token when JWT infrastructure is implemented
     String token = "temporary-token-" + user.getId();
 
-    return new AuthenticationResponse(
-        user.getId(), user.getName(), user.getEmail().getValue(), token);
+    return new AuthenticationResponse(user.getId(), user.getName(), user.getEmail().getValue(),
+        token);
   }
 
   private void validateRequest(AuthenticationRequest request) {
-    if (request.email() == null
-        || request.email().isBlank()
-        || request.password() == null
+    if (request.email() == null || request.email().isBlank() || request.password() == null
         || request.password().isBlank()) {
       throw new IllegalArgumentException("Email and password are required");
     }

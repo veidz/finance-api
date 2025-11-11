@@ -6,4 +6,5 @@ package com.veidz.financeapi.application.dto;
  * @param email the user's email address
  * @param password the user's password
  */
-public record AuthenticationRequest(String email, String password) {}
+public record AuthenticationRequest(String email, String password) {
+}
