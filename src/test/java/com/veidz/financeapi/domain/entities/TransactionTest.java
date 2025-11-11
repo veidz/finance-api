@@ -29,8 +29,8 @@ class TransactionTest {
     LocalDateTime transactionDate = LocalDateTime.now();
 
     // When
-    Transaction transaction =
-        Transaction.create(userId, amount, TransactionType.INCOME, description, transactionDate);
+    Transaction transaction = Transaction.create(userId, amount, TransactionType.INCOME,
+        description, transactionDate);
 
     // Then
     assertNotNull(transaction);
@@ -52,8 +52,8 @@ class TransactionTest {
     LocalDateTime transactionDate = LocalDateTime.now();
 
     // When
-    Transaction transaction =
-        Transaction.create(userId, amount, TransactionType.EXPENSE, description, transactionDate);
+    Transaction transaction = Transaction.create(userId, amount, TransactionType.EXPENSE,
+        description, transactionDate);
 
     // Then
     assertEquals(TransactionType.EXPENSE, transaction.getType());
@@ -67,9 +67,8 @@ class TransactionTest {
     LocalDateTime transactionDate = LocalDateTime.now();
 
     // When & Then
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> Transaction.create(null, amount, TransactionType.INCOME, description, transactionDate));
+    assertThrows(IllegalArgumentException.class, () -> Transaction.create(null, amount,
+        TransactionType.INCOME, description, transactionDate));
   }
 
   @Test
@@ -80,9 +79,8 @@ class TransactionTest {
     LocalDateTime transactionDate = LocalDateTime.now();
 
     // When & Then
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> Transaction.create(userId, null, TransactionType.INCOME, description, transactionDate));
+    assertThrows(IllegalArgumentException.class, () -> Transaction.create(userId, null,
+        TransactionType.INCOME, description, transactionDate));
   }
 
   @Test
@@ -94,9 +92,8 @@ class TransactionTest {
     LocalDateTime transactionDate = LocalDateTime.now();
 
     // When & Then
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> Transaction.create(userId, amount, TransactionType.INCOME, description, transactionDate));
+    assertThrows(IllegalArgumentException.class, () -> Transaction.create(userId, amount,
+        TransactionType.INCOME, description, transactionDate));
   }
 
   @Test
@@ -107,12 +104,10 @@ class TransactionTest {
     LocalDateTime transactionDate = LocalDateTime.now();
 
     // When & Then - Money value object should reject negative amounts
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> {
-          Money amount = new Money(BigDecimal.valueOf(-100.00), Currency.getInstance("USD"));
-          Transaction.create(userId, amount, TransactionType.INCOME, description, transactionDate);
-        });
+    assertThrows(IllegalArgumentException.class, () -> {
+      Money amount = new Money(BigDecimal.valueOf(-100.00), Currency.getInstance("USD"));
+      Transaction.create(userId, amount, TransactionType.INCOME, description, transactionDate);
+    });
   }
 
   @Test
@@ -124,8 +119,7 @@ class TransactionTest {
     LocalDateTime transactionDate = LocalDateTime.now();
 
     // When & Then
-    assertThrows(
-        IllegalArgumentException.class,
+    assertThrows(IllegalArgumentException.class,
         () -> Transaction.create(userId, amount, null, description, transactionDate));
   }
 
@@ -137,8 +131,7 @@ class TransactionTest {
     LocalDateTime transactionDate = LocalDateTime.now();
 
     // When & Then
-    assertThrows(
-        IllegalArgumentException.class,
+    assertThrows(IllegalArgumentException.class,
         () -> Transaction.create(userId, amount, TransactionType.INCOME, null, transactionDate));
   }
 
@@ -150,8 +143,7 @@ class TransactionTest {
     LocalDateTime transactionDate = LocalDateTime.now();
 
     // When & Then
-    assertThrows(
-        IllegalArgumentException.class,
+    assertThrows(IllegalArgumentException.class,
         () -> Transaction.create(userId, amount, TransactionType.INCOME, "", transactionDate));
   }
 
@@ -163,8 +155,7 @@ class TransactionTest {
     LocalDateTime transactionDate = LocalDateTime.now();
 
     // When & Then
-    assertThrows(
-        IllegalArgumentException.class,
+    assertThrows(IllegalArgumentException.class,
         () -> Transaction.create(userId, amount, TransactionType.INCOME, "   ", transactionDate));
   }
 
@@ -176,8 +167,7 @@ class TransactionTest {
     String description = "Test transaction";
 
     // When & Then
-    assertThrows(
-        IllegalArgumentException.class,
+    assertThrows(IllegalArgumentException.class,
         () -> Transaction.create(userId, amount, TransactionType.INCOME, description, null));
   }
 
@@ -190,8 +180,8 @@ class TransactionTest {
     LocalDateTime transactionDate = LocalDateTime.now();
 
     // When
-    Transaction transaction =
-        Transaction.create(userId, amount, TransactionType.INCOME, description, transactionDate);
+    Transaction transaction = Transaction.create(userId, amount, TransactionType.INCOME,
+        description, transactionDate);
 
     // Then
     assertEquals("Test transaction", transaction.getDescription());
@@ -204,8 +194,8 @@ class TransactionTest {
     Money amount = new Money(BigDecimal.valueOf(100.00), Currency.getInstance("USD"));
     LocalDateTime transactionDate = LocalDateTime.now();
 
-    Transaction transaction =
-        Transaction.create(userId, amount, TransactionType.INCOME, "Salary", transactionDate);
+    Transaction transaction = Transaction.create(userId, amount, TransactionType.INCOME, "Salary",
+        transactionDate);
 
     // When
     Money balanceImpact = transaction.getBalanceImpact();
@@ -223,8 +213,8 @@ class TransactionTest {
     Money amount = new Money(BigDecimal.valueOf(100.00), Currency.getInstance("USD"));
     LocalDateTime transactionDate = LocalDateTime.now();
 
-    Transaction transaction =
-        Transaction.create(userId, amount, TransactionType.EXPENSE, "Groceries", transactionDate);
+    Transaction transaction = Transaction.create(userId, amount, TransactionType.EXPENSE,
+        "Groceries", transactionDate);
 
     // When
     Money balanceImpact = transaction.getBalanceImpact();
@@ -243,8 +233,8 @@ class TransactionTest {
     Money amount = new Money(BigDecimal.valueOf(100.00), Currency.getInstance("USD"));
     LocalDateTime transactionDate = LocalDateTime.now();
 
-    Transaction transaction =
-        Transaction.create(userId, amount, TransactionType.EXPENSE, "Shopping", transactionDate);
+    Transaction transaction = Transaction.create(userId, amount, TransactionType.EXPENSE,
+        "Shopping", transactionDate);
 
     // When
     transaction.assignCategory(categoryId);
@@ -261,8 +251,8 @@ class TransactionTest {
     LocalDateTime transactionDate = LocalDateTime.now();
 
     // When
-    Transaction transaction =
-        Transaction.create(userId, amount, TransactionType.EXPENSE, "Misc", transactionDate);
+    Transaction transaction = Transaction.create(userId, amount, TransactionType.EXPENSE, "Misc",
+        transactionDate);
 
     // Then
     assertDoesNotThrow(() -> transaction.assignCategory(null));
@@ -275,8 +265,8 @@ class TransactionTest {
     Money amount = new Money(BigDecimal.valueOf(100.00), Currency.getInstance("USD"));
     LocalDateTime transactionDate = LocalDateTime.now();
 
-    Transaction transaction =
-        Transaction.create(userId, amount, TransactionType.EXPENSE, "Old description", transactionDate);
+    Transaction transaction = Transaction.create(userId, amount, TransactionType.EXPENSE,
+        "Old description", transactionDate);
 
     // When
     transaction.updateDescription("New description");
@@ -292,8 +282,8 @@ class TransactionTest {
     Money amount = new Money(BigDecimal.valueOf(100.00), Currency.getInstance("USD"));
     LocalDateTime transactionDate = LocalDateTime.now();
 
-    Transaction transaction =
-        Transaction.create(userId, amount, TransactionType.EXPENSE, "Old description", transactionDate);
+    Transaction transaction = Transaction.create(userId, amount, TransactionType.EXPENSE,
+        "Old description", transactionDate);
 
     // When & Then
     assertThrows(IllegalArgumentException.class, () -> transaction.updateDescription(null));
@@ -306,8 +296,8 @@ class TransactionTest {
     Money amount = new Money(BigDecimal.valueOf(100.00), Currency.getInstance("USD"));
     LocalDateTime transactionDate = LocalDateTime.now();
 
-    Transaction transaction =
-        Transaction.create(userId, amount, TransactionType.EXPENSE, "Old description", transactionDate);
+    Transaction transaction = Transaction.create(userId, amount, TransactionType.EXPENSE,
+        "Old description", transactionDate);
 
     // When & Then
     assertThrows(IllegalArgumentException.class, () -> transaction.updateDescription(""));

@@ -27,14 +27,8 @@ public final class Transaction {
   /**
    * Private constructor to prevent direct instantiation. Use static factory method instead.
    */
-  private Transaction(
-      UUID id,
-      UUID userId,
-      Money amount,
-      TransactionType type,
-      String description,
-      LocalDateTime transactionDate,
-      LocalDateTime createdAt) {
+  private Transaction(UUID id, UUID userId, Money amount, TransactionType type, String description,
+      LocalDateTime transactionDate, LocalDateTime createdAt) {
     this.id = id;
     this.userId = userId;
     this.amount = amount;
@@ -55,31 +49,21 @@ public final class Transaction {
    * @return a new Transaction instance
    * @throws IllegalArgumentException if any validation fails
    */
-  public static Transaction create(
-      UUID userId,
-      Money amount,
-      TransactionType type,
-      String description,
-      LocalDateTime transactionDate) {
+  public static Transaction create(UUID userId, Money amount, TransactionType type,
+      String description, LocalDateTime transactionDate) {
     validateUserId(userId);
     validateAmount(amount);
     validateType(type);
     validateDescription(description);
     validateTransactionDate(transactionDate);
 
-    return new Transaction(
-        UUID.randomUUID(),
-        userId,
-        amount,
-        type,
-        description.trim(),
-        transactionDate,
-        LocalDateTime.now());
+    return new Transaction(UUID.randomUUID(), userId, amount, type, description.trim(),
+        transactionDate, LocalDateTime.now());
   }
 
   /**
-   * Gets the absolute amount of the balance impact. For direction (positive/negative), use {@link
-   * #getType()}.
+   * Gets the absolute amount of the balance impact. For direction (positive/negative), use
+   * {@link #getType()}.
    *
    * @return the amount that impacts the balance
    */
@@ -203,24 +187,8 @@ public final class Transaction {
 
   @Override
   public String toString() {
-    return "Transaction{"
-        + "id="
-        + id
-        + ", userId="
-        + userId
-        + ", amount="
-        + amount
-        + ", type="
-        + type
-        + ", description='"
-        + description
-        + '\''
-        + ", categoryId="
-        + categoryId
-        + ", transactionDate="
-        + transactionDate
-        + ", createdAt="
-        + createdAt
-        + '}';
+    return "Transaction{" + "id=" + id + ", userId=" + userId + ", amount=" + amount + ", type="
+        + type + ", description='" + description + '\'' + ", categoryId=" + categoryId
+        + ", transactionDate=" + transactionDate + ", createdAt=" + createdAt + '}';
   }
 }
