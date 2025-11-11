@@ -20,9 +20,9 @@
 
   <properties>
     <!-- Java Version -->
-    <java.version>17</java.version>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
+    <java.version>21</java.version>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- Dependencies Versions -->
@@ -33,7 +33,7 @@
     <rest-assured.version>5.4.0</rest-assured.version>
     <spotbugs-maven-plugin.version>4.8.3.1</spotbugs-maven-plugin.version>
     <checkstyle.version>10.12.5</checkstyle.version>
-    <jacoco.version>0.8.11</jacoco.version>
+    <jacoco.version>0.8.14</jacoco.version>
     <owasp-dependency-check.version>9.0.7</owasp-dependency-check.version>
   </properties>
 
@@ -102,6 +102,11 @@
     <groupId>org.projectlombok</groupId>
     <artifactId>lombok</artifactId>
     <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok-mapstruct-binding</artifactId>
+      <version>0.2.0</version>
     </dependency>
 
     <!-- MapStruct (object mapping) -->
@@ -195,10 +200,8 @@
     <plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-compiler-plugin</artifactId>
-    <version>3.11.0</version>
+    <version>3.14.1</version>
     <configuration>
-      <source>${java.version}</source>
-      <target>${java.version}</target>
       <annotationProcessorPaths>
       <path>
       <groupId>org.projectlombok</groupId>
@@ -216,6 +219,7 @@
       <version>${lombok-mapstruct-binding.version}</version>
       </path>
       </annotationProcessorPaths>
+          <release>${java.version}</release>
     </configuration>
     </plugin>
 
@@ -325,7 +329,7 @@
     <plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-checkstyle-plugin</artifactId>
-    <version>3.3.1</version>
+    <version>3.6.0</version>
     <dependencies>
       <dependency>
       <groupId>com.puppycrawl.tools</groupId>
