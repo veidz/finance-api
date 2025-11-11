@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit tests for User entity.
- * Following TDD: test first, then implement.
+ * Unit tests for User entity. Following TDD: test first, then implement.
  *
  * @author Veidz
  */
@@ -21,7 +20,7 @@ class UserTest {
     String password = "SecurePass123";
 
     // Act
-    User user = new User(name, email, password);
+    User user = User.create(name, email, password);
 
     // Assert
     assertNotNull(user);
@@ -35,7 +34,7 @@ class UserTest {
   void shouldHashPasswordWhenCreatingUser() {
     // Arrange
     String plainPassword = "MyPassword123";
-    User user = new User("Jane Doe", new Email("jane@example.com"), plainPassword);
+    User user = User.create("Jane Doe", new Email("jane@example.com"), plainPassword);
 
     // Act
     String hashedPassword = user.getPasswordHash();
@@ -53,10 +52,8 @@ class UserTest {
     String password = "password123";
 
     // Act & Assert
-    IllegalArgumentException exception = assertThrows(
-        IllegalArgumentException.class,
-        () -> new User(null, email, password)
-    );
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        () -> User.create(null, email, password));
     assertEquals("Name cannot be null or empty", exception.getMessage());
   }
 
@@ -67,10 +64,8 @@ class UserTest {
     String password = "password123";
 
     // Act & Assert
-    IllegalArgumentException exception = assertThrows(
-        IllegalArgumentException.class,
-        () -> new User("", email, password)
-    );
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        () -> User.create("", email, password));
     assertEquals("Name cannot be null or empty", exception.getMessage());
   }
 
@@ -81,10 +76,8 @@ class UserTest {
     String password = "password123";
 
     // Act & Assert
-    IllegalArgumentException exception = assertThrows(
-        IllegalArgumentException.class,
-        () -> new User("   ", email, password)
-    );
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        () -> User.create("   ", email, password));
     assertEquals("Name cannot be null or empty", exception.getMessage());
   }
 
@@ -95,10 +88,8 @@ class UserTest {
     String password = "password123";
 
     // Act & Assert
-    IllegalArgumentException exception = assertThrows(
-        IllegalArgumentException.class,
-        () -> new User(name, null, password)
-    );
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        () -> User.create(name, null, password));
     assertEquals("Email cannot be null", exception.getMessage());
   }
 
@@ -109,10 +100,8 @@ class UserTest {
     Email email = new Email("john@example.com");
 
     // Act & Assert
-    IllegalArgumentException exception = assertThrows(
-        IllegalArgumentException.class,
-        () -> new User(name, email, null)
-    );
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        () -> User.create(name, email, null));
     assertEquals("Password cannot be null or empty", exception.getMessage());
   }
 
@@ -123,10 +112,8 @@ class UserTest {
     Email email = new Email("john@example.com");
 
     // Act & Assert
-    IllegalArgumentException exception = assertThrows(
-        IllegalArgumentException.class,
-        () -> new User(name, email, "")
-    );
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        () -> User.create(name, email, ""));
     assertEquals("Password cannot be null or empty", exception.getMessage());
   }
 
@@ -138,10 +125,8 @@ class UserTest {
     String shortPassword = "123";
 
     // Act & Assert
-    IllegalArgumentException exception = assertThrows(
-        IllegalArgumentException.class,
-        () -> new User(name, email, shortPassword)
-    );
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        () -> User.create(name, email, shortPassword));
     assertEquals("Password must be at least 6 characters long", exception.getMessage());
   }
 
@@ -149,7 +134,7 @@ class UserTest {
   void shouldVerifyPasswordCorrectlyWhenPasswordMatches() {
     // Arrange
     String plainPassword = "MySecurePass123";
-    User user = new User("John Doe", new Email("john@example.com"), plainPassword);
+    User user = User.create("John Doe", new Email("john@example.com"), plainPassword);
 
     // Act
     boolean isValid = user.verifyPassword(plainPassword);
@@ -162,7 +147,7 @@ class UserTest {
   void shouldRejectPasswordWhenPasswordDoesNotMatch() {
     // Arrange
     String plainPassword = "MySecurePass123";
-    User user = new User("John Doe", new Email("john@example.com"), plainPassword);
+    User user = User.create("John Doe", new Email("john@example.com"), plainPassword);
 
     // Act
     boolean isValid = user.verifyPassword("WrongPassword");
@@ -174,7 +159,7 @@ class UserTest {
   @Test
   void shouldUpdateNameWhenNewNameIsValid() {
     // Arrange
-    User user = new User("Old Name", new Email("user@example.com"), "password123");
+    User user = User.create("Old Name", new Email("user@example.com"), "password123");
     String newName = "New Name";
 
     // Act
@@ -187,13 +172,11 @@ class UserTest {
   @Test
   void shouldRejectUpdatingNameWhenNewNameIsInvalid() {
     // Arrange
-    User user = new User("Old Name", new Email("user@example.com"), "password123");
+    User user = User.create("Old Name", new Email("user@example.com"), "password123");
 
     // Act & Assert
-    IllegalArgumentException exception = assertThrows(
-        IllegalArgumentException.class,
-        () -> user.updateName("")
-    );
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        () -> user.updateName(""));
     assertEquals("Name cannot be null or empty", exception.getMessage());
   }
 
@@ -201,7 +184,7 @@ class UserTest {
   void shouldChangePasswordWhenCurrentPasswordIsCorrect() {
     // Arrange
     String currentPassword = "OldPassword123";
-    User user = new User("John Doe", new Email("john@example.com"), currentPassword);
+    User user = User.create("John Doe", new Email("john@example.com"), currentPassword);
     String newPassword = "NewPassword456";
 
     // Act
@@ -216,23 +199,21 @@ class UserTest {
   void shouldRejectPasswordChangeWhenCurrentPasswordIsWrong() {
     // Arrange
     String currentPassword = "OldPassword123";
-    User user = new User("John Doe", new Email("john@example.com"), currentPassword);
+    User user = User.create("John Doe", new Email("john@example.com"), currentPassword);
     String wrongPassword = "WrongPassword";
     String newPassword = "NewPassword456";
 
     // Act & Assert
-    IllegalArgumentException exception = assertThrows(
-        IllegalArgumentException.class,
-        () -> user.changePassword(wrongPassword, newPassword)
-    );
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        () -> user.changePassword(wrongPassword, newPassword));
     assertEquals("Current password is incorrect", exception.getMessage());
   }
 
   @Test
   void shouldGenerateUniqueIdsForDifferentUsers() {
     // Arrange & Act
-    User user1 = new User("User One", new Email("user1@example.com"), "password123");
-    User user2 = new User("User Two", new Email("user2@example.com"), "password123");
+    User user1 = User.create("User One", new Email("user1@example.com"), "password123");
+    User user2 = User.create("User Two", new Email("user2@example.com"), "password123");
 
     // Assert
     assertNotEquals(user1.getId(), user2.getId());
@@ -241,8 +222,8 @@ class UserTest {
   @Test
   void shouldCompareTwoUsersById() {
     // Arrange
-    User user1 = new User("User One", new Email("user1@example.com"), "password123");
-    User user2 = new User("User Two", new Email("user2@example.com"), "password123");
+    User user1 = User.create("User One", new Email("user1@example.com"), "password123");
+    User user2 = User.create("User Two", new Email("user2@example.com"), "password123");
 
     // Act & Assert
     assertNotEquals(user1, user2);

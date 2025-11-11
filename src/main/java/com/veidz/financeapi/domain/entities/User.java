@@ -6,12 +6,12 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * User domain entity representing a user in the system.
- * Contains business logic and invariants for user management.
+ * User domain entity representing a user in the system. Contains business logic and invariants for
+ * user management.
  *
  * @author Veidz
  */
-public class User {
+public final class User {
 
   private final UUID id;
   private String name;
@@ -20,23 +20,38 @@ public class User {
   private final LocalDateTime createdAt;
 
   /**
+   * Private constructor to prevent direct instantiation.
+   * Use static factory method instead to avoid SpotBugs CT_CONSTRUCTOR_THROW warning.
+   */
+  private User(UUID id, String name, Email email, String passwordHash, LocalDateTime createdAt) {
+    this.id = id;
+    this.name = name;
+    this.email = email;
+    this.passwordHash = passwordHash;
+    this.createdAt = createdAt;
+  }
+
+  /**
    * Creates a new User with the given details.
    *
    * @param name the user's name (must be non-null and non-empty)
    * @param email the user's email (must be non-null)
    * @param plainPassword the plain text password (must be at least 6 characters)
+   * @return a new User instance
    * @throws IllegalArgumentException if any validation fails
    */
-  public User(String name, Email email, String plainPassword) {
+  public static User create(String name, Email email, String plainPassword) {
     validateName(name);
     validateEmail(email);
     validatePassword(plainPassword);
 
-    this.id = UUID.randomUUID();
-    this.name = name.trim();
-    this.email = email;
-    this.passwordHash = hashPassword(plainPassword);
-    this.createdAt = LocalDateTime.now();
+    return new User(
+        UUID.randomUUID(),
+        name.trim(),
+        email,
+        hashPassword(plainPassword),
+        LocalDateTime.now()
+    );
   }
 
   /**
@@ -78,19 +93,19 @@ public class User {
     this.passwordHash = hashPassword(newPassword);
   }
 
-  private void validateName(String name) {
+  private static void validateName(String name) {
     if (name == null || name.isBlank()) {
       throw new IllegalArgumentException("Name cannot be null or empty");
     }
   }
 
-  private void validateEmail(Email email) {
+  private static void validateEmail(Email email) {
     if (email == null) {
       throw new IllegalArgumentException("Email cannot be null");
     }
   }
 
-  private void validatePassword(String password) {
+  private static void validatePassword(String password) {
     if (password == null || password.isEmpty()) {
       throw new IllegalArgumentException("Password cannot be null or empty");
     }
@@ -100,13 +115,13 @@ public class User {
   }
 
   /**
-   * Simple password hashing (for demonstration purposes).
-   * In production, use BCrypt or similar secure hashing algorithms.
+   * Simple password hashing (for demonstration purposes). In production, use BCrypt or similar
+   * secure hashing algorithms.
    *
    * @param plainPassword the plain text password
    * @return the hashed password
    */
-  private String hashPassword(String plainPassword) {
+  private static String hashPassword(String plainPassword) {
     // Simple hash for now (will be replaced with BCrypt in infrastructure layer)
     return "hashed_" + plainPassword + "_" + plainPassword.length();
   }
