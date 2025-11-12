@@ -1,6 +1,9 @@
 package com.veidz.financeapi.application.ports;
 
 import com.veidz.financeapi.domain.entities.Transaction;
+import com.veidz.financeapi.domain.enums.TransactionType;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,4 +38,32 @@ public interface TransactionRepository {
    * @param id the transaction's ID
    */
   void deleteById(UUID id);
+
+  /**
+   * Finds transactions for a user with optional filters and pagination.
+   *
+   * @param userId the user ID who owns the transactions
+   * @param startDate optional start date for filtering (inclusive)
+   * @param endDate optional end date for filtering (inclusive)
+   * @param type optional transaction type filter
+   * @param categoryId optional category ID filter
+   * @param page page number (0-based)
+   * @param size number of items per page
+   * @return list of transactions matching the criteria
+   */
+  List<Transaction> findByUserIdWithFilters(UUID userId, LocalDate startDate, LocalDate endDate,
+      TransactionType type, UUID categoryId, int page, int size);
+
+  /**
+   * Counts transactions for a user with optional filters.
+   *
+   * @param userId the user ID who owns the transactions
+   * @param startDate optional start date for filtering (inclusive)
+   * @param endDate optional end date for filtering (inclusive)
+   * @param type optional transaction type filter
+   * @param categoryId optional category ID filter
+   * @return total count of transactions matching the criteria
+   */
+  long countByUserIdWithFilters(UUID userId, LocalDate startDate, LocalDate endDate,
+      TransactionType type, UUID categoryId);
 }
