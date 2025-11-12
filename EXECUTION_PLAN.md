@@ -6,14 +6,62 @@ Implementar API de Controle Financeiro com IA seguindo TDD, Clean Architecture e
 
 ---
 
-## 📦 FASE 1: SETUP INICIAL (Semana 1)
+## 📊 Status Atual
 
-### 1.1 Setup Estrutura Base
+### ✅ Concluído
 
-- [ ] Criar estrutura de diretórios (domain, application, infrastructure, web)
-- [ ] Configurar `pom.xml` com dependências essenciais
-- [ ] Criar `.gitignore` para Java/Maven
-- [ ] Configurar `application.yml` (profiles: dev, prod, test)
+- **FASE 1**: Setup Inicial (95% completo)
+
+  - Estrutura de diretórios ✅
+  - Maven + dependências ✅
+  - Docker + Docker Compose ✅
+  - CI Pipeline (GitHub Actions) ✅
+  - Checkstyle + SpotBugs + JaCoCo ✅
+
+- **FASE 2**: Domain Layer (100% completo)
+
+  - Value Objects: Money, Email, DateRange ✅
+  - Enums: TransactionType, GoalStatus ✅
+  - Entities: User (15 tests), Transaction (16 tests), Category (11 tests), Budget (31 tests), FinancialGoal (33 tests) ✅
+  - **Total Domain Tests**: 106 tests passing ✅
+
+- **FASE 3**: Application Layer (10% completo)
+  - CreateUserUseCase: Implementado com 8 tests ✅
+  - UserRepository port interface ✅
+  - DTOs: CreateUserRequest, UserResponse ✅
+  - SpotBugs CI issues resolvidos ✅
+
+### 🚧 Em Progresso
+
+- **FASE 3**: Application Layer - Use Cases
+  - **Próximo**: AuthenticateUserUseCase
+
+### 📈 Estatísticas
+
+- **Total de Testes**: 149 passing (106 domain + 8 application + 35 outros)
+- **Cobertura de Código**: JaCoCo configurado (14 classes analisadas)
+- **Qualidade de Código**:
+  - Checkstyle: 0 violations
+  - SpotBugs: 0 bugs
+  - Build Status: ✅ Passing
+
+### 🎯 Próximos Passos
+
+1. Implementar `AuthenticateUserUseCase` (TDD)
+2. Completar use cases de Transaction (Create, List, Update, Delete)
+3. Completar use cases de Budget e Goal
+4. Iniciar FASE 4: Infrastructure Layer (JPA adapters)
+
+---
+
+## 📦 FASE 1: SETUP INICIAL ✅
+
+### 1.1 Setup Estrutura Base ✅
+
+- [x] Criar estrutura de diretórios (domain, application, infrastructure, web)
+- [x] Configurar `pom.xml` com dependências essenciais
+- [x] Criar `.gitignore` para Java/Maven
+- [x] Configurar `application.yml` (profiles: dev, prod, test)
 
 **Dependências principais**:
 
@@ -32,12 +80,12 @@ Implementar API de Controle Financeiro com IA seguindo TDD, Clean Architecture e
 - rest-assured
 ```
 
-### 1.2 Docker & DevContainer
+### 1.2 Docker & DevContainer ✅
 
-- [ ] Criar `Dockerfile` multi-stage (builder + runtime)
-- [ ] Criar `docker-compose.yml` (app + postgres local)
-- [ ] Configurar `.devcontainer/devcontainer.json`
-  - Java 17
+- [x] Criar `Dockerfile` multi-stage (builder + runtime)
+- [x] Criar `docker-compose.yml` (app + postgres local)
+- [x] Configurar `.devcontainer/devcontainer.json`
+  - Java 21
   - Maven
   - PostgreSQL client
   - Extensions VS Code
@@ -50,16 +98,16 @@ docker-compose up -d
 docker build -t finance-api .
 ```
 
-### 1.3 VS Code Configuration
+### 1.3 VS Code Configuration ⚠️ (Parcial)
 
 - [ ] `.vscode/extensions.json` (Java, Spring, Docker, GitLens, Test Runner)
 - [ ] `.vscode/settings.json` (formatação, Java runtime)
 - [ ] `.vscode/tasks.json` (mvn: test, package, run)
 - [ ] `.vscode/launch.json` (debug Spring Boot)
 
-### 1.4 CI/CD Pipeline
+### 1.4 CI/CD Pipeline ✅
 
-- [ ] `.github/workflows/ci.yml`
+- [x] `.github/workflows/ci.yml`
   - Job: build
   - Job: unit-tests (com JaCoCo)
   - Job: integration-tests (Testcontainers)
@@ -90,77 +138,77 @@ V5__create_goals_table.sql
 
 ---
 
-## 🧱 FASE 2: DOMAIN LAYER (Semana 2)
+## 🧱 FASE 2: DOMAIN LAYER
 
-### 2.1 Value Objects (TDD)
+### 2.1 Value Objects (TDD) ✅
 
 **Test First** → Implementar → Refatorar
 
-- [ ] `Money` (BigDecimal + Currency, validations)
+- [x] `Money` (BigDecimal + Currency, validations)
 
-  - Test: should create valid money
-  - Test: should reject negative amounts
-  - Test: should add two money objects with same currency
-  - Test: should throw exception when adding different currencies
+  - Test: should create valid money ✅
+  - Test: should reject negative amounts ✅
+  - Test: should add two money objects with same currency ✅
+  - Test: should throw exception when adding different currencies ✅
 
-- [ ] `Email` (validação de formato)
+- [x] `Email` (validação de formato)
 
-  - Test: should accept valid email
-  - Test: should reject invalid email format
+  - Test: should accept valid email ✅
+  - Test: should reject invalid email format ✅
 
-- [ ] `DateRange` (período com validação)
+- [x] `DateRange` (período com validação)
 
-  - Test: should create valid date range
-  - Test: should reject start date after end date
+  - Test: should create valid date range ✅
+  - Test: should reject start date after end date ✅
 
-- [ ] `TransactionType` (enum: INCOME, EXPENSE)
+- [x] `TransactionType` (enum: INCOME, EXPENSE)
 
-- [ ] `GoalStatus` (enum: IN_PROGRESS, ACHIEVED, CANCELLED)
+- [x] `GoalStatus` (enum: IN_PROGRESS, ACHIEVED, CANCELLED)
 
-### 2.2 Domain Entities (TDD)
+### 2.2 Domain Entities (TDD) ✅
 
-#### User Entity
+#### User Entity ✅
 
-- [ ] **Test**: should create user with valid data
-- [ ] **Test**: should validate email format
-- [ ] **Test**: should hash password
-- [ ] **Implement**: User entity with invariants
-- [ ] **Refactor**: extract password hashing to VO
+- [x] **Test**: should create user with valid data (15 tests total)
+- [x] **Test**: should validate email format
+- [x] **Test**: should hash password
+- [x] **Implement**: User entity with invariants
+- [x] **Refactor**: extract password hashing to VO
 
-#### Transaction Entity
+#### Transaction Entity ✅
 
-- [ ] **Test**: should create transaction with all required fields
-- [ ] **Test**: should calculate balance impact (income +, expense -)
-- [ ] **Test**: should validate amount > 0
-- [ ] **Test**: should link to category
-- [ ] **Implement**: Transaction entity
-- [ ] **Refactor**: extract business rules to methods
+- [x] **Test**: should create transaction with all required fields (16 tests total)
+- [x] **Test**: should calculate balance impact (income +, expense -)
+- [x] **Test**: should validate amount > 0
+- [x] **Test**: should link to category
+- [x] **Implement**: Transaction entity
+- [x] **Refactor**: extract business rules to methods
 
-#### Category Entity
+#### Category Entity ✅
 
-- [ ] **Test**: should create category with name and type
-- [ ] **Test**: should prevent duplicate category names per user
-- [ ] **Implement**: Category entity
+- [x] **Test**: should create category with name and type (11 tests total)
+- [x] **Test**: should prevent duplicate category names per user
+- [x] **Implement**: Category entity
 
-#### Budget Entity
+#### Budget Entity ✅
 
-- [ ] **Test**: should create budget with amount and period
-- [ ] **Test**: should calculate spent percentage
-- [ ] **Test**: should alert when 80% spent
-- [ ] **Test**: should mark as exceeded when > 100%
-- [ ] **Implement**: Budget entity with alerts logic
+- [x] **Test**: should create budget with amount and period (31 tests total)
+- [x] **Test**: should calculate spent percentage
+- [x] **Test**: should alert when 80% spent
+- [x] **Test**: should mark as exceeded when > 100%
+- [x] **Implement**: Budget entity with alerts logic
 
-#### FinancialGoal Entity
+#### FinancialGoal Entity ✅
 
-- [ ] **Test**: should create goal with target and deadline
-- [ ] **Test**: should calculate progress percentage
-- [ ] **Test**: should estimate completion date based on trend
-- [ ] **Test**: should mark as achieved when target reached
-- [ ] **Implement**: FinancialGoal entity
+- [x] **Test**: should create goal with target and deadline (33 tests total)
+- [x] **Test**: should calculate progress percentage
+- [x] **Test**: should estimate completion date based on trend
+- [x] **Test**: should mark as achieved when target reached
+- [x] **Implement**: FinancialGoal entity
 
-### 2.3 Repository Interfaces (Ports)
+### 2.3 Repository Interfaces (Ports) ⚠️ (Parcial)
 
-- [ ] `UserRepository`
+- [x] `UserRepository` (application/ports)
 - [ ] `TransactionRepository` (com métodos de filtro)
 - [ ] `CategoryRepository`
 - [ ] `BudgetRepository`
@@ -174,19 +222,22 @@ V5__create_goals_table.sql
 
 ---
 
-## 🎬 FASE 3: APPLICATION LAYER - USE CASES (Semana 3)
+## 🎬 FASE 3: APPLICATION LAYER - USE CASES 🚧 Em Progresso
 
 ### 3.1 User Management Use Cases
 
-#### CreateUserUseCase (TDD)
+#### CreateUserUseCase (TDD) ✅
 
-- [ ] **Test**: should create user with hashed password
-- [ ] **Test**: should throw exception if email already exists
-- [ ] **Test**: should validate email format
-- [ ] **Implement**: use case
-- [ ] **Refactor**: extract validation
+- [x] **Test**: should create user with hashed password (8 tests total)
+- [x] **Test**: should throw exception if email already exists
+- [x] **Test**: should validate email format
+- [x] **Implement**: use case
+- [x] **Refactor**: extract validation
+- [x] **Fix**: SpotBugs CI issues (EI_EXPOSE_REP2, CT_CONSTRUCTOR_THROW)
+- [x] **Create**: UserRepository port interface
+- [x] **Create**: DTOs (CreateUserRequest, UserResponse)
 
-#### AuthenticateUserUseCase (TDD)
+#### AuthenticateUserUseCase (TDD) ⏭️ Próximo
 
 - [ ] **Test**: should authenticate with correct credentials
 - [ ] **Test**: should reject wrong password
@@ -272,7 +323,7 @@ V5__create_goals_table.sql
 
 ---
 
-## 🔌 FASE 4: INFRASTRUCTURE LAYER (Semana 4)
+## 🔌 FASE 4: INFRASTRUCTURE LAYER
 
 ### 4.1 JPA Entities & Repositories
 
@@ -319,7 +370,7 @@ V5__create_goals_table.sql
 
 ---
 
-## 🌐 FASE 5: WEB LAYER - REST CONTROLLERS (Semana 5)
+## 🌐 FASE 5: WEB LAYER - REST CONTROLLERS
 
 ### 5.1 DTOs & Mappers
 
@@ -363,7 +414,7 @@ V5__create_goals_table.sql
 
 #### ReportController
 
-- [ ] **Test**: GET /api/v1/reports/monthly?month=2025-01 (200 OK)
+- [ ] **Test**: GET /api/v1/reports/monthly?month=YYYY-MM (200 OK)
 - [ ] **Test**: GET /api/v1/reports/expenses-by-category (200 OK)
 - [ ] **Implement**: ReportController
 
@@ -378,7 +429,7 @@ V5__create_goals_table.sql
 
 ---
 
-## 🤖 FASE 6: IA INTEGRATION (Semana 6)
+## 🤖 FASE 6: IA INTEGRATION
 
 ### 6.1 Setup IA Client
 
@@ -428,12 +479,12 @@ V5__create_goals_table.sql
 - [ ] **Test**: POST /api/v1/ai/analyze-expenses (200 OK)
 - [ ] **Test**: POST /api/v1/ai/predict-expenses (200 OK)
 - [ ] **Test**: POST /api/v1/ai/recommend-goals (200 OK)
-- [ ] **Test**: GET /api/v1/ai/insights?month=2025-01 (200 OK)
+- [ ] **Test**: GET /api/v1/ai/insights?month=YYYY-MM (200 OK)
 - [ ] **Implement**: AIAssistantController
 
 ---
 
-## 🧪 FASE 7: TESTES E QUALIDADE (Semana 7)
+## 🧪 FASE 7: TESTES E QUALIDADE
 
 ### 7.1 Integration Tests (E2E)
 
@@ -463,7 +514,7 @@ V5__create_goals_table.sql
 
 ---
 
-## 🚀 FASE 8: DEPLOY & MONITORING (Semana 8)
+## 🚀 FASE 8: DEPLOY & MONITORING
 
 ### 8.1 Preparação Deploy
 
@@ -627,18 +678,18 @@ V5__create_goals_table.sql
 
 ---
 
-## 📅 Cronograma Sugerido (8 semanas)
+## 📅 Cronograma Sugerido
 
-| Semana | Fase             | Entregas                              |
-| ------ | ---------------- | ------------------------------------- |
-| 1      | Setup            | Estrutura, Docker, CI/CD, DB          |
-| 2      | Domain           | Entities, VOs, Ports                  |
-| 3      | Use Cases        | User, Transaction, Budget, Goal       |
-| 4      | Infrastructure   | JPA, Security, Config                 |
-| 5      | Web Layer        | Controllers, DTOs, Exception handling |
-| 6      | IA Integration   | AI client, Use cases, Controller      |
-| 7      | Testes & Quality | Integration tests, E2E, Quality gates |
-| 8      | Deploy & Docs    | Produção, Monitoring, Docs            |
+| Fase | Entregas                                                |
+| ---- | ------------------------------------------------------- |
+| 1    | Setup: Estrutura, Docker, CI/CD, DB                     |
+| 2    | Domain: Entities, VOs, Ports                            |
+| 3    | Use Cases: User, Transaction, Budget, Goal              |
+| 4    | Infrastructure: JPA, Security, Config                   |
+| 5    | Web Layer: Controllers, DTOs, Exception handling        |
+| 6    | IA Integration: AI client, Use cases, Controller        |
+| 7    | Testes & Quality: Integration tests, E2E, Quality gates |
+| 8    | Deploy & Docs: Produção, Monitoring, Docs               |
 
 ---
 
